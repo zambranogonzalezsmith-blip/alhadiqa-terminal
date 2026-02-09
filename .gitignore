@@ -1,1 +1,16 @@
+# Python temporales
+__pycache__/
+*.py[cod]
+*$py.class
 
+# Entornos virtuales
+venv/
+env/
+
+# Configuración de Streamlit (Local)
+.streamlit/config.toml
+.streamlit/secrets.toml
+
+# Datos y logs
+*.log
+data/cache/
