@@ -1,1 +1,29 @@
+name: Monitor de Mercado Alhadiqainvest
 
+on:
+  schedule:
+    # Se ejecuta cada 15 minutos
+    - cron: '*/15 * * * *'
+  workflow_dispatch: # Permite ejecutarlo manualmente desde GitHub
+
+jobs:
+  analizar:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Descargar repositorio
+        uses: actions/checkout@v3
+
+      - name: Configurar Python
+        uses: actions/setup-python@v4
+        with:
+          python-python-version: '3.9'
+
+      - name: Instalar herramientas
+        run: |
+          pip install pandas-ta yfinance requests
+
+      - name: Ejecutar Scanner de Alertas
+        env:
+          # Aquí conectarás la URL de Zapier o tu clave de correo más adelante
+          WEBHOOK_URL: ${{ secrets.WEBHOOK_URL }}
+        run: python scanner.py
