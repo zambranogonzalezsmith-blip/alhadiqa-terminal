@@ -1,1 +1,18 @@
+# Interfaz y Despliegue
+streamlit
 
+# Manejo y Procesamiento de Datos
+pandas
+numpy
+
+# Análisis Técnico (Indicadores)
+pandas-ta
+
+# Datos de Mercado en Tiempo Real
+yfinance
+
+# Gráficos Interactivos (Optimizado para Mobile)
+plotly
+
+# Configuración y Utilidades
+pyyaml
