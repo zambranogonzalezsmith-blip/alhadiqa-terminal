@@ -189,3 +189,22 @@ document.getElementById('asset-selector').addEventListener('change', (e) => {
     currentAssetKey = e.target.value;
     fetchMarketData();
 });
+let currentTimeframe = '15m'; // Default
+
+function cambiarTF(tf) {
+    currentTimeframe = tf;
+    
+    // Actualizar apariencia de botones
+    document.querySelectorAll('.tf-btn').forEach(btn => {
+        btn.classList.remove('active');
+        if(btn.innerText === tf.toUpperCase()) btn.classList.add('active');
+    });
+
+    console.log(`⏱️ Cambiando temporalidad a: ${tf}`);
+    
+    // Forzar recarga de datos
+    fetchMarketData();
+}
+
+// Modificación necesaria en tu función getYahooData:
+// Asegúrate de que la URL use la variable: ...interval=${currentTimeframe}...
