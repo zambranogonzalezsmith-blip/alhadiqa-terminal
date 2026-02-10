@@ -1,27 +1,32 @@
-Market Strategy Analyzer AL-HADIQA INVEST 📈
-Plataforma de análisis cuantitativo y técnico diseñada para la monitorización de mercados financieros en tiempo real. Este proyecto permite configurar estrategias personalizadas basadas en indicadores técnicos y visualizar las señales de ejecución directamente desde dispositivos móviles.
+# 💎 Alhadiqainvest | Digital Trading Terminal
 
-🚀 Características principales
-Interfaz Mobile-First: Desarrollada con Streamlit para una visualización fluida en smartphones.
+Una plataforma de trading independiente, ligera y profesional diseñada para el monitoreo de mercados en tiempo real (Criptomonedas, Oro, Índices y Forex) con indicadores técnicos integrados.
 
-Motor de Indicadores: Implementación de estrategias basadas en RSI, Medias Móviles (EMA/SMA), Bandas de Bollinger y MACD.
+## 🚀 Características Principales
 
-Backtesting Engine: Módulo para validar la efectividad de las estrategias sobre datos históricos.
+- **Independencia Total:** Ejecución directa en navegador mediante HTML5, CSS3 y JavaScript (sin dependencias de servidores de terceros para el renderizado).
+- **Multi-Mercado:** Soporte para Bitcoin, Ethereum, Oro (XAU/USD), US30, S&P 500 y pares mayores de Forex.
+- **Análisis Técnico:**
+  - EMA Rápida (9) y EMA Lenta (21).
+  - RSI de 14 períodos con suavizado profesional.
+- **Sistema de Señales:** Banner dinámico de estado (Compra / Venta / Neutral) basado en cruce de medias y fuerza relativa.
+- **Diseño Mobile-First:** Interfaz optimizada para su uso como Web App en dispositivos móviles.
 
-Conexión Multi-Mercado: Integración con APIs para obtener datos de Forex, Criptomonedas y Acciones.
+## 🛠️ Estructura del Proyecto
 
-📊 Arquitectura del Sistema
-La arquitectura se divide en cuatro capas fundamentales:
+La terminal se compone de 4 archivos esenciales:
 
-Capa de Ingesta: Obtención de datos brutos (OHLCV) mediante yfinance o CCXT.
+1. `index.html`: Estructura y visualización de la interfaz.
+2. `style.css`: Diseño "Premium Dark" y adaptabilidad móvil.
+3. `script.js`: El cerebro lógico que procesa datos y cálculos técnicos.
+4. `lightweight-charts.standalone.production.js`: Motor gráfico de alto rendimiento (TradingView).
 
-Capa de Procesamiento: Cálculo de indicadores técnicos mediante la librería pandas-ta.
+## 📱 Instalación en el Móvil
 
-Capa de Lógica: Evaluación de condiciones de entrada y salida (Long/Short).
+Para usar esta plataforma como una aplicación nativa:
+1. Abre el enlace de **GitHub Pages** en tu navegador móvil.
+2. Selecciona "Añadir a la pantalla de inicio" (en iOS: botón compartir; en Android: tres puntos verticales).
+3. ¡Listo! La plataforma se abrirá a pantalla completa sin barras de navegación.
 
-Capa de Presentación: Interfaz web interactiva alojada en Streamlit Cloud.
-
-🛠️ Requisitos Técnicos
-Python 3.9 o superior.
-
-Gestor de paquetes pip.
+---
+**Desarrollado por Alhadiqainvest** *Nota: Esta herramienta es informativa y no constituye asesoría financiera directa.*
