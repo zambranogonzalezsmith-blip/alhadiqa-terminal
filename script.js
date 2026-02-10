@@ -206,3 +206,40 @@ window.addEventListener('resize', () => {
 
 fetchMarketData();
 setInterval(fetchMarketData, CONFIG.update_ms);
+function ejecutarDiagnostico() {
+    console.log("--- INICIANDO AUTO-DIAGNÓSTICO ---");
+    let errores = [];
+    
+    // 1. Revisar Librería de Gráficos
+    if (typeof LightweightCharts === 'undefined') {
+        errores.push("❌ MOTOR DE GRÁFICOS: No cargado. Revisa el nombre del archivo .js en GitHub.");
+    } else {
+        console.log("✅ Motor OK");
+    }
+
+    // 2. Revisar Archivos vinculados
+    if (!document.styleSheets.length) {
+        errores.push("❌ CSS: No se detectan estilos.");
+    }
+
+    // 3. Revisar Imagen del Logo
+    const logo = document.querySelector('.main-logo');
+    if (!logo || logo.naturalWidth === 0) {
+        errores.push("⚠️ LOGO: La imagen icon.jpg no se encuentra o está dañada.");
+    }
+
+    // Resultado
+    if (errores.length > 0) {
+        alert("INFORME TÉCNICO ALHADIQA:\n\n" + errores.join("\n"));
+        // Intento de reparación de emergencia
+        if (typeof LightweightCharts === 'undefined') {
+            console.warn("Intentando conexión de respaldo vía CDN...");
+            const backupScript = document.createElement('script');
+            backupScript.src = "https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js";
+            document.head.appendChild(backupScript);
+            alert("He intentado conectar un motor de respaldo. Por favor, recarga la página en 5 segundos.");
+        }
+    } else {
+        alert("✅ SISTEMA ÓPTIMO: Todos los archivos están conectados correctamente.");
+    }
+}
