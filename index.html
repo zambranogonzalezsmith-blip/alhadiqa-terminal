@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alhadiqainvest | Digital Terminal</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
+</head>
+<body>
+    <div class="platform-container">
+        <header id="status-banner" class="neutral">
+            <h1 id="signal-text">ESPERANDO SEÑAL DEL MERCADO...</h1>
+        </header>
+
+        <main class="dashboard">
+            <section class="chart-area" id="main-chart"></section>
+
+            <aside class="info-panel">
+                <div class="card">
+                    <span class="label">ACTIVO</span>
+                    <span class="value" id="asset-name">BTC/USD</span>
+                </div>
+                <div class="card">
+                    <span class="label">PRECIO ACTUAL</span>
+                    <span class="value price" id="current-price">$0.00</span>
+                </div>
+                <div class="card">
+                    <span class="label">RSI (Fuerza)</span>
+                    <span class="value" id="rsi-value">--</span>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
