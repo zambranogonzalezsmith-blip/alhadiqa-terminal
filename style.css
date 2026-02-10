@@ -1,49 +1,161 @@
+/* Importar fuente moderna tipo interfaz */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
+
 body {
     background-color: #020408;
-    color: white;
+    color: #e6edf3;
     font-family: 'Inter', sans-serif;
     margin: 0;
-    overflow: hidden;
+    overflow: hidden; /* Evita scroll en la pantalla principal */
 }
 
+/* Contenedor Principal */
 .platform-container {
     display: flex;
     flex-direction: column;
     height: 100vh;
 }
 
+/* Banner Superior de Estado */
 header {
     height: 60px;
     display: flex;
     align-items: center;
     justify-content: center;
-    border-bottom: 2px solid #1a1e26;
+    border-bottom: 1px solid #30363d;
+    transition: all 0.3s ease;
+    text-align: center;
+    padding: 0 20px;
 }
 
-.neutral { background: #11141b; }
-.buy { background: #00ff88; color: #000; box-shadow: 0 0 20px #00ff88; }
-.sell { background: #ff3e3e; color: #fff; box-shadow: 0 0 20px #ff3e3e; }
+header h1 {
+    font-size: 1.2rem;
+    margin: 0;
+    letter-spacing: 1px;
+}
 
+/* Estados de la Señal (Colores Neón) */
+.neutral { background: #0d1117; color: #8b949e; }
+.buy { 
+    background: linear-gradient(90deg, #004d40, #00c853); 
+    color: white; 
+    box-shadow: 0 4px 15px rgba(0, 200, 83, 0.4);
+    border-bottom: none;
+}
+.sell { 
+    background: linear-gradient(90deg, #b71c1c, #ff5252); 
+    color: white; 
+    box-shadow: 0 4px 15px rgba(255, 82, 82, 0.4);
+    border-bottom: none;
+}
+
+/* Layout del Dashboard (Grilla) */
 .dashboard {
     display: grid;
-    grid-template-columns: 3fr 1fr;
+    grid-template-columns: 1fr 300px; /* Gráfico ocupa resto, Panel fijo 300px */
     flex-grow: 1;
+    overflow: hidden;
 }
 
+/* Área del Gráfico */
+.chart-area {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+/* Panel Lateral */
 .info-panel {
-    background: #0a0d14;
+    background: #0d1117;
     padding: 20px;
-    border-left: 1px solid #1a1e26;
+    border-left: 1px solid #30363d;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    overflow-y: auto; /* Permite scroll si hay muchas tarjetas */
 }
 
+/* Tarjetas de Información */
 .card {
-    background: #161a23;
+    background: #161b22;
     padding: 15px;
-    border-radius: 8px;
-    margin-bottom: 15px;
-    border: 1px solid #2d333f;
+    border-radius: 6px;
+    border: 1px solid #30363d;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
 }
 
-.label { display: block; font-size: 10px; color: #808a9d; margin-bottom: 5px; }
-.value { font-size: 20px; font-weight: bold; }
-.price { color: #00ff88; }
+.selector-card {
+    border: 1px solid #00bcd4; /* Borde azul para destacar el selector */
+}
+
+/* Estilo del Selector (Dropdown) */
+select#asset-selector {
+    width: 100%;
+    background-color: #0d1117;
+    color: white;
+    border: 1px solid #30363d;
+    padding: 10px;
+    border-radius: 4px;
+    font-size: 14px;
+    outline: none;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    margin-top: 5px;
+}
+
+select#asset-selector:focus {
+    border-color: #58a6ff;
+}
+
+/* Tipografía de las Tarjetas */
+.label { 
+    display: block; 
+    font-size: 11px; 
+    color: #8b949e; 
+    margin-bottom: 5px; 
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.value { 
+    font-size: 22px; 
+    font-weight: 700; 
+    font-variant-numeric: tabular-nums; /* Alinea los números */
+}
+
+.price { color: #00ff88; text-shadow: 0 0 10px rgba(0, 255, 136, 0.2); }
+
+/* --- RESPONSIVE (MÓVIL) --- */
+@media (max-width: 768px) {
+    .dashboard {
+        display: flex;
+        flex-direction: column; /* Apila uno sobre otro */
+    }
+
+    .chart-area {
+        height: 60vh; /* El gráfico ocupa el 60% de la pantalla */
+    }
+
+    .info-panel {
+        height: 40vh; /* El panel ocupa el 40% restante */
+        border-left: none;
+        border-top: 2px solid #30363d;
+        padding: 15px;
+        flex-direction: row; /* En móvil, las tarjetas se ponen de lado */
+        flex-wrap: wrap;
+        align-content: flex-start;
+        justify-content: space-between;
+    }
+
+    .card {
+        width: 45%; /* Las tarjetas ocupan casi la mitad cada una */
+        margin-bottom: 0;
+    }
+    
+    .selector-card {
+        width: 100%; /* El selector ocupa todo el ancho */
+        margin-bottom: 10px;
+    }
+    
+    .value { font-size: 18px; }
+}
