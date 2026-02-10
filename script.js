@@ -1,3 +1,15 @@
+// --- TEST DE SEGURIDAD DE LIBRERÍA ---
+(function checkLibrary() {
+    if (typeof LightweightCharts === 'undefined') {
+        console.error("La librería de gráficos no se ha cargado.");
+        document.getElementById('lib-error').style.display = 'block';
+        throw new Error("Sistema detenido: Librería faltante.");
+    } else {
+        console.log("✅ Motor de gráficos cargado correctamente.");
+    }
+})();
+
+// ... (Aquí continúa el resto de tu código script.js que ya tienes)
 // --- CONFIGURACIÓN DE LA PLATAFORMA ---
 const CONFIG = {
     ema_fast: 9,
