@@ -1,22 +1,16 @@
 // --- SISTEMA DE AUTO-RECUPERACIÓN ALHADIQA ---
 (function checkLibrary() {
     if (typeof LightweightCharts === 'undefined') {
-        console.warn("⚠️ Motor local no encontrado. Activando protocolo de emergencia...");
         const backupScript = document.createElement('script');
-        // Esto carga la librería desde internet si tu archivo local falla
         backupScript.src = "https://unpkg.com/lightweight-charts@4.1.1/dist/lightweight-charts.standalone.production.js";
-        backupScript.onload = () => {
-            console.log("✅ Motor de emergencia conectado. Iniciando terminal...");
-            initTerminal(); 
-        };
+        backupScript.onload = () => { initTerminal(); };
         document.head.appendChild(backupScript);
     } else {
-        console.log("✅ Motor ALHADIQAINVEST cargado desde chart-lib.js");
         window.onload = initTerminal;
     }
 })();
 
-// --- CONFIGURACIÓN ---
+// --- CONFIGURACIÓN Y ESTADOS ---
 const CONFIG = { ema_fast: 9, ema_slow: 21, rsi_period: 14, update_ms: 60000 };
 const ASSETS = {
     'BTC': { type: 'crypto', id: 'bitcoin', symbol: 'BTC-USD', name: 'Bitcoin' },
@@ -30,9 +24,10 @@ const ASSETS = {
 };
 
 let currentAssetKey = 'BTC';
+let terminalMode = 'normal'; // 'normal' o 'smc'
 let chart, candleSeries, emaFastSeries, emaSlowSeries;
 
-// --- INICIALIZACIÓN DE LA TERMINAL ---
+// --- INICIALIZACIÓN ---
 function initTerminal() {
     const chartElement = document.getElementById('main-chart');
     if (!chartElement) return;
@@ -55,46 +50,83 @@ function initTerminal() {
     emaFastSeries = chart.addLineSeries({ color: '#00bcd4', lineWidth: 2 });
     emaSlowSeries = chart.addLineSeries({ color: '#ffa726', lineWidth: 2 });
 
+    // Escuchador para el botón del menú
+    document.getElementById('nav-forex-smc')?.addEventListener('click', (e) => {
+        e.preventDefault();
+        activarModoSMC();
+    });
+
     fetchMarketData();
     setInterval(fetchMarketData, CONFIG.update_ms);
-
-    window.addEventListener('resize', () => {
-        chart.applyOptions({ width: chartElement.offsetWidth, height: chartElement.offsetHeight });
-    });
 }
 
-// --- GESTOR DE DATOS Y SEÑALES ---
+// --- CAMBIO DE MODO DINÁMICO ---
+function activarModoSMC() {
+    terminalMode = 'smc';
+    document.querySelectorAll('.nav-links li').forEach(li => li.classList.remove('active'));
+    document.getElementById('nav-forex-smc').parentElement.classList.add('active');
+    
+    // UI Changes
+    document.getElementById('smc-info-card').style.display = 'block';
+    emaFastSeries.applyOptions({ visible: false });
+    emaSlowSeries.applyOptions({ visible: false });
+    
+    alert("SISTEMA ALHADIQA: Modo SMC Pro Activado. Analizando huella institucional...");
+    fetchMarketData();
+}
+
+// --- GESTOR DE DATOS ---
 async function fetchMarketData() {
     const asset = ASSETS[currentAssetKey];
     document.getElementById('asset-name').innerText = asset.name;
-    document.getElementById('signal-text').innerText = "ACTUALIZANDO...";
 
     try {
         let candles = (asset.type === 'crypto') ? await getCryptoData(asset.id) : await getYahooData(asset.symbol);
-
-        if (!candles || candles.length < 2) throw new Error("Mercado cerrado");
+        if (!candles || candles.length < 2) return;
 
         candleSeries.setData(candles);
-        const emaF = calculateEMA(candles, CONFIG.ema_fast);
-        const emaS = calculateEMA(candles, CONFIG.ema_slow);
-        const rsiV = calculateRSI(candles, CONFIG.rsi_period);
-
-        emaFastSeries.setData(emaF);
-        emaSlowSeries.setData(emaS);
-
-        const lastPrice = candles[candles.length - 1].close;
-        const lastRSI = rsiV.length > 0 ? rsiV[rsiV.length - 1].value : 50;
         
+        const rsiV = calculateRSI(candles, CONFIG.rsi_period);
+        const lastRSI = rsiV.length > 0 ? rsiV[rsiV.length - 1].value : 50;
+        const lastPrice = candles[candles.length - 1].close;
+
         document.getElementById('current-price').innerText = `$${lastPrice.toLocaleString()}`;
         document.getElementById('rsi-value').innerText = lastRSI.toFixed(2);
 
-        updateSignal(emaF, emaS, lastRSI);
-    } catch (e) {
-        document.getElementById('signal-text').innerText = "SIN DATOS / MERCADO PAUSADO";
-    }
+        if (terminalMode === 'normal') {
+            const emaF = calculateEMA(candles, CONFIG.ema_fast);
+            const emaS = calculateEMA(candles, CONFIG.ema_slow);
+            emaFastSeries.setData(emaF);
+            emaSlowSeries.setData(emaS);
+            updateSignal(emaF, emaS, lastRSI);
+        } else {
+            const estructura = detectarEstructuraSMC(candles);
+            document.getElementById('smc-status').innerText = estructura;
+            document.getElementById('signal-text').innerText = `MODO SMC: ${estructura}`;
+        }
+    } catch (e) { console.error("Error de red"); }
 }
 
-// --- CONECTORES (Iguales a los anteriores pero con manejo de errores) ---
+// --- MOTOR SMC (Lógica de LuxAlgo base) ---
+function detectarEstructuraSMC(candles) {
+    if (candles.length < 20) return "Cargando Historial...";
+    
+    let altos = [], bajos = [];
+    for (let i = 2; i < candles.length - 2; i++) {
+        if (candles[i].high > candles[i-1].high && candles[i].high > candles[i+1].high) altos.push(candles[i].high);
+        if (candles[i].low < candles[i-1].low && candles[i].low < candles[i+1].low) bajos.push(candles[i].low);
+    }
+
+    const current = candles[candles.length - 1].close;
+    const lastHigh = altos[altos.length - 1];
+    const lastLow = bajos[bajos.length - 1];
+
+    if (current > lastHigh) return "BOS ALCISTA 🚀";
+    if (current < lastLow) return "BOS BAJISTA 📉";
+    return "Consolidación (IDM)";
+}
+
+// --- CONECTORES ---
 async function getCryptoData(id) {
     const r = await fetch(`https://api.coingecko.com/api/v3/coins/${id}/ohlc?vs_currency=usd&days=1`);
     return (await r.json()).map(d => ({ time: d[0]/1000, open: d[1], high: d[2], low: d[3], close: d[4] }));
@@ -102,8 +134,7 @@ async function getCryptoData(id) {
 
 async function getYahooData(s) {
     const u = `https://query1.finance.yahoo.com/v8/finance/chart/${s}?interval=15m&range=2d`;
-    const p = `https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`;
-    const r = await fetch(p);
+    const r = await fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`);
     const j = await r.json();
     const res = j.chart.result[0];
     return res.timestamp.map((t, i) => ({
@@ -123,8 +154,7 @@ function calculateEMA(data, p) {
 }
 
 function calculateRSI(data, p) {
-    let rsiArr = [];
-    if (data.length <= p) return rsiArr;
+    let rsiArr = []; if (data.length <= p) return rsiArr;
     let g = 0, l = 0;
     for (let i=1; i<=p; i++) {
         let diff = data[i].close - data[i-1].close;
@@ -150,44 +180,12 @@ function updateSignal(f, s, r) {
     else { banner.className = 'neutral'; txt.innerText = `⚪ NEUTRAL: ${currentAssetKey}`; }
 }
 
-// --- EVENTOS Y DIAGNÓSTICO ---
+function ejecutarDiagnostico() {
+    let msg = (typeof LightweightCharts !== 'undefined') ? "✅ Motor OK" : "❌ Error de Motor";
+    alert("DIAGNÓSTICO ALHADIQA:\n" + msg);
+}
+
 document.getElementById('asset-selector').addEventListener('change', (e) => {
     currentAssetKey = e.target.value;
     fetchMarketData();
 });
-
-function ejecutarDiagnostico() {
-    let msg = (typeof LightweightCharts !== 'undefined') ? "✅ Motor OK" : "❌ Error de Motor";
-    msg += (document.querySelector('.main-logo').naturalWidth > 0) ? "\n✅ Logo OK" : "\n⚠️ Logo no encontrado";
-    alert("DIAGNÓSTICO ALHADIQA:\n" + msg);
-}
-// --- MOTOR SMC (Smart Money Concepts) ---
-function detectarEstructuraSMC(candles) {
-    if (candles.length < 10) return null;
-
-    let altos = [], bajos = [];
-    
-    // Detectar Fractales (Máximos y Mínimos locales)
-    for (let i = 2; i < candles.length - 2; i++) {
-        // Swing High (Alto)
-        if (candles[i].high > candles[i-1].high && candles[i].high > candles[i-2].high &&
-            candles[i].high > candles[i+1].high && candles[i].high > candles[i+2].high) {
-            altos.push({ index: i, value: candles[i].high, time: candles[i].time });
-        }
-        // Swing Low (Bajo)
-        if (candles[i].low < candles[i-1].low && candles[i].low < candles[i-2].low &&
-            candles[i].low < candles[i+1].low && candles[i].low < candles[i+2].low) {
-            bajos.push({ index: i, value: candles[i].low, time: candles[i].time });
-        }
-    }
-
-    // Lógica de Break of Structure (BOS)
-    const precioActual = candles[candles.length - 1].close;
-    const ultimoAlto = altos[altos.length - 1]?.value;
-    const ultimoBajo = bajos[bajos.length - 1]?.value;
-
-    if (precioActual > ultimoAlto) return "BOS ALCISTA (Quiebre al alza)";
-    if (precioActual < ultimoBajo) return "BOS BAJISTA (Quiebre a la baja)";
-    
-    return "Estructura en Desarrollo";
-}
