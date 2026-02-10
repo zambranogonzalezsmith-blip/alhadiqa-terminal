@@ -161,3 +161,33 @@ function ejecutarDiagnostico() {
     msg += (document.querySelector('.main-logo').naturalWidth > 0) ? "\n✅ Logo OK" : "\n⚠️ Logo no encontrado";
     alert("DIAGNÓSTICO ALHADIQA:\n" + msg);
 }
+// --- MOTOR SMC (Smart Money Concepts) ---
+function detectarEstructuraSMC(candles) {
+    if (candles.length < 10) return null;
+
+    let altos = [], bajos = [];
+    
+    // Detectar Fractales (Máximos y Mínimos locales)
+    for (let i = 2; i < candles.length - 2; i++) {
+        // Swing High (Alto)
+        if (candles[i].high > candles[i-1].high && candles[i].high > candles[i-2].high &&
+            candles[i].high > candles[i+1].high && candles[i].high > candles[i+2].high) {
+            altos.push({ index: i, value: candles[i].high, time: candles[i].time });
+        }
+        // Swing Low (Bajo)
+        if (candles[i].low < candles[i-1].low && candles[i].low < candles[i-2].low &&
+            candles[i].low < candles[i+1].low && candles[i].low < candles[i+2].low) {
+            bajos.push({ index: i, value: candles[i].low, time: candles[i].time });
+        }
+    }
+
+    // Lógica de Break of Structure (BOS)
+    const precioActual = candles[candles.length - 1].close;
+    const ultimoAlto = altos[altos.length - 1]?.value;
+    const ultimoBajo = bajos[bajos.length - 1]?.value;
+
+    if (precioActual > ultimoAlto) return "BOS ALCISTA (Quiebre al alza)";
+    if (precioActual < ultimoBajo) return "BOS BAJISTA (Quiebre a la baja)";
+    
+    return "Estructura en Desarrollo";
+}
