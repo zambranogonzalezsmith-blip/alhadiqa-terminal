@@ -10,26 +10,52 @@
 <body>
     <div class="platform-container">
         <header id="status-banner" class="neutral">
-            <h1 id="signal-text">ESPERANDO SEÑAL DEL MERCADO...</h1>
+            <h1 id="signal-text">INICIANDO SISTEMA...</h1>
         </header>
 
         <main class="dashboard">
             <section class="chart-area" id="main-chart"></section>
 
             <aside class="info-panel">
+                
+                <div class="card selector-card">
+                    <span class="label">SELECCIONAR MERCADO</span>
+                    <select id="asset-selector">
+                        <optgroup label="Criptomonedas">
+                            <option value="BTC" selected>Bitcoin (BTC)</option>
+                            <option value="ETH">Ethereum (ETH)</option>
+                        </optgroup>
+                        <optgroup label="Commodities">
+                            <option value="GOLD">Oro (XAU/USD)</option>
+                        </optgroup>
+                        <optgroup label="Índices USA">
+                            <option value="US30">US30 (Dow Jones)</option>
+                            <option value="SP500">S&P 500</option>
+                        </optgroup>
+                        <optgroup label="Forex (Majors)">
+                            <option value="EURUSD">EUR/USD</option>
+                            <option value="GBPUSD">GBP/USD</option>
+                            <option value="USDJPY">USD/JPY</option>
+                        </optgroup>
+                    </select>
+                </div>
+
                 <div class="card">
-                    <span class="label">ACTIVO</span>
+                    <span class="label">ACTIVO VISUALIZADO</span>
                     <span class="value" id="asset-name">BTC/USD</span>
                 </div>
+                
                 <div class="card">
                     <span class="label">PRECIO ACTUAL</span>
-                    <span class="value price" id="current-price">$0.00</span>
+                    <span class="value price" id="current-price">Cargando...</span>
                 </div>
+                
                 <div class="card">
-                    <span class="label">RSI (Fuerza)</span>
+                    <span class="label">FUERZA RSI (14)</span>
                     <span class="value" id="rsi-value">--</span>
                 </div>
-            </section>
+
+            </aside>
         </main>
     </div>
 
