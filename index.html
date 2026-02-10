@@ -55,8 +55,16 @@
             <div class="content-grid">
                 <section class="chart-area" id="main-chart"></section>
 
-                <aside class="info-panel">
-                    <div class="card selector-card">
+                <div class="card selector-card">
+    <span class="label">TEMPORALIDAD (PERIOD)</span>
+    <div class="timeframe-grid">
+        <button class="tf-btn" onclick="cambiarTF('1m')">1M</button>
+        <button class="tf-btn" onclick="cambiarTF('5m')">5M</button>
+        <button class="tf-btn active" onclick="cambiarTF('15m')">15M</button>
+        <button class="tf-btn" onclick="cambiarTF('1h')">1H</button>
+        <button class="tf-btn" onclick="cambiarTF('1d')">1D</button>
+    </div>
+                </div>
                         <span class="label">SELECCIONAR MERCADO</span>
                         <select id="asset-selector">
                             <optgroup label="Criptomonedas">
