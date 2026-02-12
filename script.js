@@ -242,3 +242,37 @@ async function conectarMetaMask() {
         } catch (e) { alert("LINK_REJECTED"); }
     } else { alert("METAMASK_NOT_FOUND"); }
     }
+// --- KIRA SMC MODULE: ORDER BLOCKS ---
+let orderBlocks = [];
+
+function detectarOrderBlocks(candles) {
+    // Limpiar bloques antiguos para no saturar la gráfica
+    orderBlocks.forEach(obj => chart.removeVertLine(obj)); // Simplificado para el ejemplo
+
+    for (let i = candles.length - 20; i < candles.length - 1; i++) {
+        const current = candles[i];
+        const next = candles[i + 1];
+
+        // Lógica de Order Block Bajista (Vela alcista antes de caída fuerte)
+        if (current.close > current.open && (next.open - next.close) > (current.high - current.low) * 2) {
+            marcarZona(current.high, current.low, 'bearish');
+        }
+        
+        // Lógica de Order Block Alcista (Vela bajista antes de subida fuerte)
+        if (current.close < current.open && (next.close - next.open) > (current.high - current.low) * 2) {
+            marcarZona(current.high, current.low, 'bullish');
+        }
+    }
+}
+
+function marcarZona(top, bottom, type) {
+    const color = type === 'bullish' ? 'rgba(0, 255, 157, 0.2)' : 'rgba(255, 74, 74, 0.2)';
+    const lineId = candleSeries.createPriceLine({
+        price: (top + bottom) / 2,
+        color: type === 'bullish' ? '#00ff9d' : '#ff4a4a',
+        lineWidth: 2,
+        lineStyle: 2, // Dash line
+        axisLabelVisible: true,
+        title: type.toUpperCase() + ' OB',
+    });
+}
