@@ -1,217 +1,190 @@
-/* --- ALHADIQA CORE TERMINAL v4.5 | STEALTH EDITION --- */
+/* --- ALHADIQA HYPER-STYLE v6.0 | PERFORMANCE OPTIMIZED --- */
 @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@300;400;600&display=swap');
 
 :root {
-    --bg-main: #050608;          /* Ultra Deep Black */
-    --bg-sidebar: #0a0c12;       /* Slate Dark */
-    --bg-card: rgba(22, 25, 37, 0.75); 
-    --border: rgba(31, 209, 237, 0.15);
-    --accent: #1fd1ed;           /* Kali Cyan */
-    --gold: #d29922;             /* Gold Leaf */
-    --success: #00ff9d;
-    --danger: #ff4a4a;
-    --text-main: #e2e8f0;
-    --text-dim: #64748b;
+    --bg-black: #020408;
+    --bg-side: #0a0c12;
+    --accent-cyan: #1fd1ed;
+    --gold-leaf: #d29922;
+    --success-neon: #00ff9d;
+    --danger-neon: #ff4a4a;
+    --border-soft: rgba(31, 209, 237, 0.12);
+    --glass: rgba(10, 12, 18, 0.9);
 }
 
-/* 1. RESET Y BASE CORE */
+/* 1. RESET CRÍTICO */
 * { 
     box-sizing: border-box; 
-    outline: none; 
     margin: 0; 
     padding: 0; 
+    scrollbar-width: thin;
+    scrollbar-color: var(--gold-leaf) transparent;
 }
 
-body {
-    background-color: var(--bg-main);
-    color: var(--text-main);
-    font-family: 'Inter', sans-serif;
+body { 
+    background: var(--bg-black); 
+    color: #e2e8f0; 
+    font-family: 'Inter', sans-serif; 
     height: 100vh; 
-    width: 100vw;
-    overflow: hidden; /* Vital para que la terminal no tenga scroll */
+    width: 100vw; 
+    overflow: hidden; 
     display: flex;
-    flex-direction: column;
 }
 
-/* 2. LAYOUT ESTRUCTURAL */
-.dashboard-wrapper {
-    display: flex;
-    flex: 1; /* Ocupa todo el espacio restante bajo la top-bar */
-    position: relative;
-    width: 100%;
-    height: 100%;
-}
-
-/* Sidebar Flotante/Deslizable */
+/* 2. SIDEBAR ESTRUCTURAL */
 .sidebar {
-    width: 260px;
-    height: 100%;
-    background: var(--bg-sidebar);
-    border-right: 1px solid var(--border);
-    display: flex;
-    flex-direction: column;
-    padding: 20px;
-    z-index: 1000;
-    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    width: 280px; 
+    background: var(--bg-side); 
+    border-right: 1px solid var(--border-soft);
+    display: flex; 
+    flex-direction: column; 
+    padding: 20px; 
+    z-index: 100;
 }
 
-/* Cuando el menú está colapsado se oculta fuera de pantalla */
-.menu-collapsed .sidebar { 
-    transform: translateX(-100%); 
-    position: absolute; 
+.brand-section {
+    padding-bottom: 25px;
+    border-bottom: 1px solid var(--border-soft);
+    margin-bottom: 25px;
 }
 
-/* Main Content: Se expande cuando el sidebar desaparece */
-.main-content {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    min-width: 0; 
-    transition: all 0.3s ease;
-}
-
-.content-grid {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) 340px;
-    height: 100%;
-}
-
-/* 3. MOTOR GRÁFICO (FIX PANTALLA NEGRA) */
-.chart-area {
-    background: #000;
-    position: relative; /* Obligatorio para el posicionamiento absoluto del hijo */
-    border-right: 1px solid var(--border);
-    overflow: hidden;
-    height: 100%;
-    width: 100%;
-}
-
-#main-chart {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    z-index: 1;
-}
-
-/* 4. PANELES DE INFORMACIÓN Y CARDS */
-.info-panel {
-    background: var(--bg-main);
-    padding: 15px;
-    overflow-y: auto;
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-    border-left: 1px solid var(--border);
-    z-index: 2;
-}
-
-.card {
-    background: var(--bg-card);
-    border: 1px solid var(--border);
-    backdrop-filter: blur(12px);
-    border-radius: 8px;
-    padding: 18px;
-    position: relative;
-}
-
-.kira-panel { 
-    border-top: 2px solid var(--gold); 
-}
-
-.highlight {
+.brand-section h2 {
+    color: var(--accent-cyan);
     font-family: 'JetBrains Mono', monospace;
-    color: var(--accent);
-    font-size: 1.3rem;
+    font-size: 1.2rem;
+    letter-spacing: -1px;
 }
 
-/* 5. ELEMENTOS DE INTERFAZ (BOTONES Y INPUTS) */
-.tf-btn {
-    background: rgba(26, 30, 46, 0.6);
-    border: 1px solid var(--border);
-    color: var(--text-dim);
-    padding: 6px 12px;
+.brand-section small {
+    color: var(--gold-leaf);
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+}
+
+/* 3. BOTONES DE NAVEGACIÓN SMC */
+.nav-group { margin-bottom: 25px; }
+.nav-label { 
+    font-size: 10px; 
+    color: #64748b; 
+    text-transform: uppercase; 
+    margin-bottom: 12px; 
+    display: block; 
+    font-weight: 700;
+}
+
+.btn-nav { 
+    width: 100%; 
+    background: rgba(255, 255, 255, 0.02); 
+    border: 1px solid var(--border-soft); 
+    color: #cbd5e1; 
+    padding: 12px; 
+    margin-bottom: 8px; 
+    cursor: pointer; 
+    font-size: 11px;
     font-family: 'JetBrains Mono', monospace;
-    font-size: 10px;
-    cursor: pointer;
-    border-radius: 4px;
+    text-align: left;
     transition: 0.2s;
 }
 
-.tf-btn.active {
-    background: var(--accent);
-    color: #000;
-    font-weight: bold;
-    box-shadow: 0 0 15px rgba(31, 209, 237, 0.4);
+.btn-nav:hover {
+    border-color: var(--accent-cyan);
+    background: rgba(31, 209, 237, 0.05);
 }
 
-#menu-toggle {
-    position: fixed; 
-    top: 15px; 
-    left: 15px;
-    z-index: 1100;
-    background: var(--bg-sidebar);
-    border: 1px solid var(--accent);
-    color: var(--accent);
-    padding: 8px 15px;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 10px;
-    cursor: pointer;
+.btn-nav.active {
+    border-left: 3px solid var(--accent-cyan);
+    background: rgba(31, 209, 237, 0.1);
+    color: #fff;
 }
 
-/* 6. MODALES Y PAGOS */
-.modal-overlay {
-    display: none; 
-    position: fixed;
-    top: 0; left: 0; 
-    width: 100%; height: 100%;
-    background: rgba(0, 0, 0, 0.92);
-    backdrop-filter: blur(10px);
-    z-index: 2000;
-    justify-content: center; 
-    align-items: center;
+/* 4. ÁREA PRINCIPAL (GRAFICADOR) */
+.main { 
+    flex: 1; 
+    display: flex; 
+    flex-direction: column; 
+    min-width: 0; 
 }
 
-.payment-card {
-    width: 380px;
-    background: #0d0f14;
-    border: 1px solid var(--gold);
-    padding: 35px;
-    border-radius: 4px;
-    text-align: center;
+.header {
+    height: 48px; 
+    border-bottom: 1px solid var(--border-soft);
+    display: flex; 
+    align-items: center; 
+    justify-content: space-between; 
+    padding: 0 25px;
+    background: var(--bg-black);
 }
 
-.wallet-address-box {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 11px;
+.chart-container { 
+    flex: 1; 
+    position: relative; 
     background: #000;
-    padding: 12px;
-    border: 1px dashed var(--gold);
-    color: var(--gold);
-    margin: 20px 0;
-    cursor: pointer;
 }
 
-/* 7. ANIMACIONES Y SEÑALES KIRA */
-.signal-confirmed-high {
-    border-left: 4px solid var(--success);
-    background: linear-gradient(90deg, rgba(0, 255, 157, 0.1), transparent);
-    animation: pulse-border 2s infinite;
+#tv_chart_container { 
+    position: absolute; 
+    top: 0; 
+    left: 0; 
+    width: 100%; 
+    height: 100%; 
 }
 
-@keyframes pulse-border {
-    0% { border-color: var(--success); }
-    50% { border-color: var(--accent); }
-    100% { border-color: var(--success); }
+/* 5. KIRA HUD (CONTROL DE ENTRADAS) */
+.kira-hud {
+    position: absolute; 
+    bottom: 30px; 
+    right: 30px; 
+    width: 320px;
+    background: var(--glass); 
+    border: 1px solid var(--gold-leaf);
+    padding: 20px; 
+    border-radius: 4px; 
+    backdrop-filter: blur(12px); 
+    z-index: 1000;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.8);
 }
 
-/* 8. RESPONSIVE FIXES */
-@media (max-width: 900px) {
-    .content-grid {
-        grid-template-columns: 1fr;
-    }
-    .info-panel {
-        display: none; /* Ocultamos panel lateral en móviles para priorizar el gráfico */
-    }
+.signal-badge {
+    padding: 8px; 
+    text-align: center; 
+    font-weight: 700; 
+    margin-bottom: 15px;
+    font-size: 11px;
+    font-family: 'JetBrains Mono', monospace;
 }
+
+.buy { background: rgba(0, 255, 157, 0.15); color: var(--success-neon); border: 1px solid var(--success-neon); }
+.sell { background: rgba(255, 74, 74, 0.15); color: var(--danger-neon); border: 1px solid var(--danger-neon); }
+
+.metric-row { 
+    display: flex; 
+    justify-content: space-between; 
+    font-size: 11px; 
+    margin-top: 8px; 
+    font-family: 'JetBrains Mono', monospace;
+}
+
+.metric-row span:first-child { color: #94a3b8; }
+.val { color: var(--accent-cyan); font-weight: 700; }
+
+/* 6. SELECTOR DE ACTIVOS */
+.asset-select {
+    width: 100%; 
+    background: #000; 
+    color: white; 
+    border: 1px solid var(--border-soft); 
+    padding: 10px; 
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    margin-top: auto;
+}
+
+/* 7. ANIMACIONES */
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.5; }
+    100% { opacity: 1; }
+}
+
+.scanning { animation: pulse 1.5s infinite; }
