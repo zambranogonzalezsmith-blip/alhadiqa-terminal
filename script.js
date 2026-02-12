@@ -113,4 +113,100 @@ window.onload = () => {
     setInterval(updateClock, 1000);
     setInterval(ejecutarKiraSMC, 30000); // Escaneo cada 30 segundos
     ejecutarKiraSMC(); 
+    
+};
+/* --- NUCLEUS ALGORITHM SMC v1.0 --- */
+
+let widget;
+let trades = [];
+
+// 1. INICIAR TRADINGVIEW
+function initChart() {
+    widget = new TradingView.widget({
+        "autosize": true,
+        "symbol": "BINANCE:BTCUSDT",
+        "interval": "15",
+        "timezone": "Etc/UTC",
+        "theme": "dark",
+        "container_id": "tv_chart_main",
+        "library_path": "https://s3.tradingview.com/",
+        "enable_publishing": false,
+        "hide_side_toolbar": false,
+        "details": true,
+        "studies": [
+            "RSI@tv-basicstudies",
+            "MAExp@tv-basicstudies"
+        ]
+    });
+}
+
+// 2. DETECTOR DE SESIONES HORARIAS
+function updateSession() {
+    const hour = new Date().getUTCHours();
+    const tag = document.getElementById('session-tag');
+    
+    if (hour >= 8 && hour < 12) tag.innerText = "SESSION: NEW YORK (HIGH VOLATILITY)";
+    else if (hour >= 0 && hour < 8) tag.innerText = "SESSION: LONDON (TRENDING)";
+    else if (hour >= 13 && hour < 21) tag.innerText = "SESSION: TOKYO (RANGE)";
+    else tag.innerText = "SESSION: ASIAN KILLZONE";
+}
+
+// 3. ALGORITMO KIRA SMC (MOTOR DE ENTRADAS)
+function runSMCAlgorithm() {
+    // Simulamos detección de choque de liquidez y order block
+    const isBullish = Math.random() > 0.5;
+    const price = 65000 + (Math.random() * 500);
+    
+    // Proyectar Niveles (Estructura 1:3 RR)
+    const slDist = price * 0.005; // 0.5% SL
+    const tpDist = slDist * 3;     // 1.5% TP
+
+    const signal = {
+        type: isBullish ? 'INSTITUTIONAL_BUY' : 'INSTITUTIONAL_SELL',
+        entry: price.toFixed(2),
+        sl: isBullish ? (price - slDist).toFixed(2) : (price + slDist).toFixed(2),
+        tp: isBullish ? (price + tpDist).toFixed(2) : (price - tpDist).toFixed(2)
+    };
+
+    updateHUD(signal);
+    executeDemoTrade(signal);
+}
+
+function updateHUD(s) {
+    const type = document.getElementById('signal-type');
+    type.innerText = s.type;
+    type.className = s.type.includes('BUY') ? 'val' : 'danger';
+    
+    document.getElementById('entry-val').innerText = `$${s.entry}`;
+    document.getElementById('sl-val').innerText = `$${s.sl}`;
+    document.getElementById('tp-val').innerText = `$${s.tp}`;
+}
+
+// 4. EMULADOR DEMO REAL-TIME
+function executeDemoTrade(s) {
+    const tradeLog = document.getElementById('active-trades');
+    const tradeHtml = `
+        <div class="stat-item" style="border-bottom: 1px solid #1a1e2e; padding-bottom: 5px;">
+            <small>${s.type}</small>
+            <span class="val">${s.entry}</span>
+        </div>
+    `;
+    tradeLog.innerHTML = tradeHtml + tradeLog.innerHTML;
+    
+    // Simulación de P/L
+    setInterval(() => {
+        const pl = (Math.random() * 100 - 40).toFixed(2);
+        const el = document.getElementById('live-pl');
+        el.innerText = `${pl > 0 ? '+' : ''}$${pl}`;
+        el.style.color = pl > 0 ? 'var(--success)' : 'var(--danger)';
+    }, 2000);
+}
+
+// ARRANQUE
+window.onload = () => {
+    initChart();
+    updateSession();
+    setInterval(updateSession, 60000);
+    setTimeout(runSMCAlgorithm, 3000); // Primera señal a los 3 seg
+    setInterval(runSMCAlgorithm, 30000); // Escaneo cada 30 seg
 };
