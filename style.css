@@ -119,3 +119,15 @@ body {
     border-radius: 4px;
     text-align: center;
 }
+/* Notificaciones de Alta Probabilidad */
+.signal-confirmed-high {
+    border-left: 4px solid var(--success);
+    background: linear-gradient(90deg, rgba(0, 255, 157, 0.1), transparent);
+    animation: pulse-border 2s infinite;
+}
+
+@keyframes pulse-border {
+    0% { border-color: var(--success); }
+    50% { border-color: var(--accent); }
+    100% { border-color: var(--success); }
+}
