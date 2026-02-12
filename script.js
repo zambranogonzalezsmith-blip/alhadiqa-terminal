@@ -463,7 +463,42 @@ const KIRA_ALGO = {
             sl = price + (pips_sl * 0.0001) + spread;
             tp = price - ((sl - price) * this.settings.min_rr);
         }
+// --- LÓGICA DE GESTIÓN KIRA 1.0 ---
 
+function actualizarSesion() {
+    const hora = new Date().getUTCHours();
+    const badge = document.getElementById('session-indicator');
+    
+    // Londres: 08-16 UTC | NY: 13-21 UTC
+    const london = (hora >= 8 && hora <= 16);
+    const ny = (hora >= 13 && hora <= 21);
+
+    if (london || ny) {
+        badge.innerText = london && ny ? "LDN + NY OVERLAP" : (london ? "LONDON ACTIVE" : "NY ACTIVE");
+        badge.classList.add('active');
+        return true;
+    } else {
+        badge.innerText = "ASIA / CERRADO";
+        badge.classList.remove('active');
+        return false;
+    }
+}
+
+function calcularLotaje() {
+    const balance = parseFloat(document.getElementById('kira-balance').value);
+    const riesgoPercent = 0.01; // 1%
+    const stopLossPips = 15; // Promedio para Sniper en 1m-15m
+    
+    // Fórmula: (Capital * % Riesgo) / (Pips de SL * Valor del Pip)
+    // Para divisas estándar, 0.01 lotes = 0.10$ el pip
+    const riesgoUSD = balance * riesgoPercent;
+    const lotaje = riesgoUSD / (stopLossPips * 10); 
+    
+    document.getElementById('suggested-lot').innerText = lotaje.toFixed(2);
+}
+
+// Llamar a estas funciones en cada actualización
+setInterval(actualizarSesion, 60000); // Revisar sesión cada minuto
         return { type, price, sl, tp, risk: "1%" };
     }
 };
