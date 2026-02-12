@@ -402,3 +402,68 @@ const SMC_ENGINE = {
         return null;
     }
 };
+const KIRA_ALGO = {
+    settings: {
+        sma_long: 100,
+        ema_80: 80,
+        ema_50: 50,
+        ema_20: 20,
+        risk_per_trade: 0.01, // 1% de la cuenta
+        min_rr: 2.5 // Ratio Riesgo:Beneficio mínimo
+    },
+
+    analyze: function(candles, currentSpread) {
+        if (candles.length < 100) return null;
+
+        // A. CÁLCULO DE INDICADORES
+        const sma100 = calculateSMA(candles, this.settings.sma_long);
+        const ema80 = calculateEMA(candles, this.settings.ema_80);
+        const ema50 = calculateEMA(candles, this.settings.ema_50);
+        const ema20 = calculateEMA(candles, this.settings.ema_20);
+
+        const last = candles.length - 1;
+        const price = candles[last].close;
+
+        // B. DETECCIÓN DE SESIÓN (Evitar Spreads altos fuera de hora)
+        const hour = new Date().getUTCHours();
+        const isMarketActive = (hour >= 8 && hour <= 12) || (hour >= 13 && hour <= 17); // Londres y NY
+
+        // C. LÓGICA SNIPER (BUY)
+        const isBullishStack = ema20[last].value > ema50[last].value && ema50[last].value > ema80[last].value;
+        const isAboveMacro = price > sma100[last].value;
+        
+        // Buscamos si el motor SMC ya detectó un Order Block Alcista
+        const smcData = SMC_ENGINE.analyze(candles); 
+        const lastMarker = smcData[smcData.length - 1];
+
+        if (isBullishStack && isAboveMacro && isMarketActive && lastMarker?.text === 'ENTRY BUY 🎯') {
+            return this.calculateTrade(price, 'BUY', currentSpread);
+        }
+
+        // D. LÓGICA SNIPER (SELL)
+        const isBearishStack = ema20[last].value < ema50[last].value && ema50[last].value < ema80[last].value;
+        const isBelowMacro = price < sma100[last].value;
+
+        if (isBearishStack && isBelowMacro && isMarketActive && lastMarker?.text === 'ENTRY SELL 🎯') {
+            return this.calculateTrade(price, 'SELL', currentSpread);
+        }
+
+        return null;
+    },
+
+    calculateTrade: function(price, type, spread) {
+        // Cálculo Sniper con Spread incluido (JustMarket/Admirals)
+        const pips_sl = 10; // SL dinámico (10 pips base)
+        let sl, tp;
+
+        if (type === 'BUY') {
+            sl = price - (pips_sl * 0.0001) - spread;
+            tp = price + ((price - sl) * this.settings.min_rr);
+        } else {
+            sl = price + (pips_sl * 0.0001) + spread;
+            tp = price - ((sl - price) * this.settings.min_rr);
+        }
+
+        return { type, price, sl, tp, risk: "1%" };
+    }
+};
