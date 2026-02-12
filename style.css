@@ -1,39 +1,51 @@
-/* --- ALHADIQA CORE THEME ADJUSTED --- */
+/* --- ALHADIQA CORE TERMINAL v4.5 | STEALTH EDITION --- */
 @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@300;400;600&display=swap');
 
 :root {
-    --bg-main: #050608;          
-    --bg-sidebar: #0a0c12;       
+    --bg-main: #050608;          /* Ultra Deep Black */
+    --bg-sidebar: #0a0c12;       /* Slate Dark */
     --bg-card: rgba(22, 25, 37, 0.75); 
     --border: rgba(31, 209, 237, 0.15);
-    --accent: #1fd1ed;           
-    --gold: #d29922;             
+    --accent: #1fd1ed;           /* Kali Cyan */
+    --gold: #d29922;             /* Gold Leaf */
     --success: #00ff9d;
     --danger: #ff4a4a;
     --text-main: #e2e8f0;
     --text-dim: #64748b;
 }
 
-/* Reset y Base */
-* { box-sizing: border-box; outline: none; margin: 0; padding: 0; }
+/* 1. RESET Y BASE CORE */
+* { 
+    box-sizing: border-box; 
+    outline: none; 
+    margin: 0; 
+    padding: 0; 
+}
+
 body {
     background-color: var(--bg-main);
     color: var(--text-main);
     font-family: 'Inter', sans-serif;
-    height: 100vh; width: 100vw;
-    overflow: hidden;
+    height: 100vh; 
+    width: 100vw;
+    overflow: hidden; /* Vital para que la terminal no tenga scroll */
+    display: flex;
+    flex-direction: column;
 }
 
-/* Layout Maestro */
+/* 2. LAYOUT ESTRUCTURAL */
 .dashboard-wrapper {
     display: flex;
-    height: 100vh; width: 100vw;
+    flex: 1; /* Ocupa todo el espacio restante bajo la top-bar */
     position: relative;
+    width: 100%;
+    height: 100%;
 }
 
-/* Sidebar con Transición Suave */
+/* Sidebar Flotante/Deslizable */
 .sidebar {
     width: 260px;
+    height: 100%;
     background: var(--bg-sidebar);
     border-right: 1px solid var(--border);
     display: flex;
@@ -43,37 +55,47 @@ body {
     transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.menu-collapsed .sidebar { transform: translateX(-100%); }
+/* Cuando el menú está colapsado se oculta fuera de pantalla */
+.menu-collapsed .sidebar { 
+    transform: translateX(-100%); 
+    position: absolute; 
+}
 
-/* Main Content: El motor de visualización */
+/* Main Content: Se expande cuando el sidebar desaparece */
 .main-content {
-    flex-grow: 1;
+    flex: 1;
     display: flex;
     flex-direction: column;
-    min-width: 0; /* Fix para que el gráfico no rompa el layout */
+    min-width: 0; 
     transition: all 0.3s ease;
 }
 
 .content-grid {
     display: grid;
-    grid-template-columns: 1fr 340px;
+    grid-template-columns: minmax(0, 1fr) 340px;
     height: 100%;
 }
 
-/* Estabilización de Área Gráfica */
+/* 3. MOTOR GRÁFICO (FIX PANTALLA NEGRA) */
 .chart-area {
     background: #000;
-    position: relative;
+    position: relative; /* Obligatorio para el posicionamiento absoluto del hijo */
     border-right: 1px solid var(--border);
-    overflow: hidden; /* Evita scrollbars fantasmas */
+    overflow: hidden;
+    height: 100%;
+    width: 100%;
 }
 
 #main-chart {
+    position: absolute;
+    top: 0;
+    left: 0;
     width: 100%;
     height: 100%;
+    z-index: 1;
 }
 
-/* Paneles de Información */
+/* 4. PANELES DE INFORMACIÓN Y CARDS */
 .info-panel {
     background: var(--bg-main);
     padding: 15px;
@@ -82,6 +104,7 @@ body {
     flex-direction: column;
     gap: 15px;
     border-left: 1px solid var(--border);
+    z-index: 2;
 }
 
 .card {
@@ -90,36 +113,87 @@ body {
     backdrop-filter: blur(12px);
     border-radius: 8px;
     padding: 18px;
+    position: relative;
 }
 
-.kira-panel { border-top: 2px solid var(--gold); }
+.kira-panel { 
+    border-top: 2px solid var(--gold); 
+}
 
-/* Tipografía de Datos */
 .highlight {
     font-family: 'JetBrains Mono', monospace;
     color: var(--accent);
     font-size: 1.3rem;
 }
 
-/* Modales e Interfaz de Pago */
+/* 5. ELEMENTOS DE INTERFAZ (BOTONES Y INPUTS) */
+.tf-btn {
+    background: rgba(26, 30, 46, 0.6);
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    padding: 6px 12px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: 0.2s;
+}
+
+.tf-btn.active {
+    background: var(--accent);
+    color: #000;
+    font-weight: bold;
+    box-shadow: 0 0 15px rgba(31, 209, 237, 0.4);
+}
+
+#menu-toggle {
+    position: fixed; 
+    top: 15px; 
+    left: 15px;
+    z-index: 1100;
+    background: var(--bg-sidebar);
+    border: 1px solid var(--accent);
+    color: var(--accent);
+    padding: 8px 15px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    cursor: pointer;
+}
+
+/* 6. MODALES Y PAGOS */
 .modal-overlay {
-    display: none; position: fixed;
-    top:0; left:0; width:100%; height:100%;
-    background: rgba(0, 0, 0, 0.9);
+    display: none; 
+    position: fixed;
+    top: 0; left: 0; 
+    width: 100%; height: 100%;
+    background: rgba(0, 0, 0, 0.92);
     backdrop-filter: blur(10px);
     z-index: 2000;
-    justify-content: center; align-items: center;
+    justify-content: center; 
+    align-items: center;
 }
 
 .payment-card {
-    width: 90%; max-width: 400px;
+    width: 380px;
     background: #0d0f14;
     border: 1px solid var(--gold);
     padding: 35px;
     border-radius: 4px;
     text-align: center;
 }
-/* Notificaciones de Alta Probabilidad */
+
+.wallet-address-box {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    background: #000;
+    padding: 12px;
+    border: 1px dashed var(--gold);
+    color: var(--gold);
+    margin: 20px 0;
+    cursor: pointer;
+}
+
+/* 7. ANIMACIONES Y SEÑALES KIRA */
 .signal-confirmed-high {
     border-left: 4px solid var(--success);
     background: linear-gradient(90deg, rgba(0, 255, 157, 0.1), transparent);
@@ -130,4 +204,14 @@ body {
     0% { border-color: var(--success); }
     50% { border-color: var(--accent); }
     100% { border-color: var(--success); }
+}
+
+/* 8. RESPONSIVE FIXES */
+@media (max-width: 900px) {
+    .content-grid {
+        grid-template-columns: 1fr;
+    }
+    .info-panel {
+        display: none; /* Ocultamos panel lateral en móviles para priorizar el gráfico */
+    }
 }
