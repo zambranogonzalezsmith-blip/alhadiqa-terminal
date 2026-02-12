@@ -1,11 +1,121 @@
-/* --- ESTILOS KIRA PAY (PASARELA BLOCKCHAIN) --- */
+/* 1. CONFIGURACIÓN BASE Y VARIABLES */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+
+:root {
+    --bg-main: #010409;
+    --bg-sidebar: #0d1117;
+    --bg-card: #161b22;
+    --border: #30363d;
+    --accent: #58a6ff;
+    --success: #238636;
+    --danger: #f85149;
+    --gold: #d29922;
+}
+
+* { box-sizing: border-box; }
+
+body {
+    background-color: var(--bg-main);
+    color: #e6edf3;
+    font-family: 'Inter', sans-serif;
+    margin: 0; padding: 0;
+    height: 100vh; width: 100vw;
+    overflow: hidden;
+}
+
+/* 2. ESTRUCTURA DASHBOARD */
+.dashboard-wrapper {
+    display: flex;
+    height: 100vh;
+    width: 100vw;
+}
+
+/* SIDEBAR CORREGIDO */
+.sidebar {
+    width: 260px;
+    background-color: var(--bg-sidebar);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 999;
+    flex-shrink: 0;
+}
+
+.menu-collapsed .sidebar {
+    transform: translateX(-100%);
+    position: absolute;
+}
+
+/* LOGO FIX */
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 25px;
+}
+
+.main-logo {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    object-fit: cover;
+    border: 1px solid var(--gold);
+}
+
+/* 3. ÁREA DE CONTENIDO Y GRÁFICO (El fix de la pantalla vacía) */
+.main-content {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0; /* Importante para que el gráfico no se desborde */
+}
+
+.content-grid {
+    display: grid;
+    grid-template-columns: 1fr 320px;
+    flex-grow: 1;
+    height: calc(100vh - 60px); /* Ajuste de altura */
+}
+
+/* ESTO HACE QUE APAREZCA EL GRÁFICO */
+.chart-area {
+    background: var(--bg-main);
+    width: 100%;
+    height: 100%;
+    min-height: 100%; 
+    position: relative;
+}
+
+/* 4. PANELES DE INFORMACIÓN */
+.info-panel {
+    background: var(--bg-sidebar);
+    border-left: 1px solid var(--border);
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    overflow-y: auto;
+}
+
+.card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 15px;
+}
+
+/* 5. KIRA PAY (Tu código integrado) */
 #crypto-modal {
     display: none;
     position: fixed;
     top: 0; left: 0;
     width: 100%; height: 100%;
-    background: rgba(1, 4, 9, 0.85); /* Fondo oscuro semitransparente */
-    backdrop-filter: blur(10px); /* Efecto de desenfoque profesional */
+    background: rgba(1, 4, 9, 0.85);
+    backdrop-filter: blur(10px);
     z-index: 10000;
     justify-content: center;
     align-items: center;
@@ -19,83 +129,33 @@
     padding: 30px;
     border-radius: 20px;
     text-align: center;
-    box-shadow: 0 0 40px rgba(210, 153, 34, 0.15);
-    position: relative;
 }
 
 .qr-container {
-    background: white;
-    padding: 15px;
-    border-radius: 12px;
-    display: inline-block;
-    margin: 20px 0;
-    box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+    background: white; padding: 15px;
+    border-radius: 12px; display: inline-block; margin: 20px 0;
 }
 
-.qr-container img {
-    display: block;
-    width: 180px;
-    height: 180px;
-}
-
-.wallet-address-box {
-    background: #161b22;
-    padding: 12px;
-    border-radius: 8px;
-    font-family: 'monospace';
-    font-size: 11px;
-    color: var(--accent);
-    border: 1px solid var(--border);
-    margin-bottom: 20px;
-    word-break: break-all;
-    cursor: pointer;
-    transition: 0.2s;
-}
-
-.wallet-address-box:hover {
-    border-color: var(--gold);
-    background: #1c2128;
-}
+.qr-container img { width: 180px; height: 180px; display: block; }
 
 .btn-metamask {
-    width: 100%;
-    background: linear-gradient(90deg, #f3ba2f, #d29922);
-    color: #000;
-    border: none;
-    padding: 14px;
-    border-radius: 10px;
-    font-weight: 800;
-    font-size: 13px;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    cursor: pointer;
-    transition: 0.3s ease;
+    width: 100%; background: linear-gradient(90deg, #f3ba2f, #d29922);
+    color: #000; border: none; padding: 14px; border-radius: 10px;
+    font-weight: 800; cursor: pointer;
 }
 
-.btn-metamask:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(210, 153, 34, 0.4);
+/* 6. BOTÓN MENÚ */
+#menu-toggle {
+    position: fixed;
+    top: 15px; left: 15px;
+    z-index: 1001;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    color: white; padding: 8px 12px;
+    border-radius: 6px; cursor: pointer;
 }
 
-/* Animación de entrada */
 @keyframes fadeIn {
     from { opacity: 0; transform: scale(0.95); }
     to { opacity: 1; transform: scale(1); }
-}
-
-/* --- INDICADOR DE CARGA PARA DEPÓSITOS --- */
-.verifying-loader {
-    width: 20px;
-    height: 20px;
-    border: 2px solid var(--gold);
-    border-bottom-color: transparent;
-    border-radius: 50%;
-    display: inline-block;
-    animation: rotation 1s linear infinite;
-    margin-right: 10px;
-}
-
-@keyframes rotation {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
 }
