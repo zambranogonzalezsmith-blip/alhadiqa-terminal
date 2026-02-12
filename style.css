@@ -295,3 +295,55 @@ select#asset-selector {
 .sidebar { transition: transform 0.3s ease; transform: translateX(0); }
 .menu-collapsed .sidebar { transform: translateX(-100%); position: absolute; }
 .menu-collapsed .main-content { margin-left: 0; width: 100%; }
+.kira-panel {
+    background: linear-gradient(145deg, #0d1117 0%, #161b22 100%) !important;
+    border: 1px solid #30363d !important;
+    border-left: 4px solid #58a6ff !important;
+}
+
+.kira-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.session-badge {
+    background: #21262d;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 0.65em;
+    border: 1px solid #30363d;
+}
+
+.session-badge.active {
+    background: #238636;
+    color: white;
+    box-shadow: 0 0 10px #238636;
+}
+
+.kira-signal-box {
+    background: #0d1117;
+    padding: 10px;
+    border-radius: 5px;
+    text-align: center;
+    border: 1px dashed #30363d;
+}
+
+.kira-buy { border: 1px solid #238636 !important; background: rgba(35, 134, 54, 0.1); }
+.kira-sell { border: 1px solid #da3633 !important; background: rgba(218, 54, 51, 0.1); }
+
+.risk-calculator {
+    margin-top: 15px;
+    padding-top: 10px;
+    border-top: 1px solid #30363d;
+}
+
+.risk-calculator input {
+    width: 100%;
+    background: #0d1117;
+    border: 1px solid #30363d;
+    color: #58a6ff;
+    padding: 5px;
+    border-radius: 4px;
+}
