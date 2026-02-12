@@ -11,137 +11,221 @@
 })();
 
 // --- CONFIGURACIÓN GLOBAL ---
-let CONFIG = { ema_fast: 9, ema_slow: 21, rsi_period: 14, update_ms: 30000 };
-let currentAssetKey = 'BTC';
-let currentTimeframe = '15m'; 
-let terminalMode = 'normal';
+let CONFIG = { ema_fast: 9, ema_slow: 21, rsi_period: 14 };
+let GLOBAL = {
+    asset: 'BTC',
+    type: 'crypto', // 'crypto' o 'forex'
+    tf: '1m',       // Temporalidad por defecto para binarias
+    socket: null,   // Variable para el túnel WebSocket
+    interval: null, // Variable para el intervalo Forex
+    symbol_map: {   // Mapeo para Binance
+        'BTC': 'btcusdt',
+        'ETH': 'ethusdt'
+    }
+};
+
 let chart, candleSeries, emaFastSeries, emaSlowSeries;
 
-// --- INICIALIZACIÓN DEL MOTOR ---
+// --- 1. INICIALIZACIÓN DEL MOTOR GRÁFICO ---
 function initTerminal() {
     const chartElement = document.getElementById('main-chart');
     if (!chartElement) return;
 
+    // Configuración estilo TradingView
     chart = LightweightCharts.createChart(chartElement, {
         width: chartElement.offsetWidth,
         height: chartElement.offsetHeight,
         layout: { background: { type: 'solid', color: '#010409' }, textColor: '#d1d4dc', fontSize: 12 },
         grid: { vertLines: { color: '#161b22' }, horzLines: { color: '#161b22' } },
-        // --- MEJORA DE MOVIMIENTO TIPO TRADINGVIEW ---
+        crosshair: { mode: LightweightCharts.CrosshairMode.Normal },
+        // Movimiento fluido activado
         handleScroll: { mouseWheel: true, pressedMouseMove: true, horzTouchDrag: true, vertTouchDrag: true },
         handleScale: { axisPressedMouseMove: true, mouseWheel: true, pinch: true },
-        timeScale: { timeVisible: true, borderColor: '#30363d', rightOffset: 10, barSpacing: 8 },
-        crosshair: { mode: LightweightCharts.CrosshairMode.Normal }
+        timeScale: { timeVisible: true, borderColor: '#30363d', rightOffset: 5, barSpacing: 10 },
     });
 
+    // Series de datos
     candleSeries = chart.addCandlestickSeries({
-        upColor: '#39d353', downColor: '#ff3e3e',
-        borderVisible: false, wickUpColor: '#39d353', wickDownColor: '#ff3e3e',
+        upColor: '#089981', downColor: '#f23645', // Colores TradingView modernos
+        borderVisible: false, wickUpColor: '#089981', wickDownColor: '#f23645',
     });
 
-    emaFastSeries = chart.addLineSeries({ color: '#00bcd4', lineWidth: 2 });
-    emaSlowSeries = chart.addLineSeries({ color: '#ffa726', lineWidth: 2 });
+    emaFastSeries = chart.addLineSeries({ color: '#2962ff', lineWidth: 2 });
+    emaSlowSeries = chart.addLineSeries({ color: '#ff9800', lineWidth: 2 });
 
-    // Eventos
-    document.getElementById('asset-selector').addEventListener('change', (e) => {
-        currentAssetKey = e.target.value;
-        fetchMarketData();
-    });
-
-    document.getElementById('nav-forex-smc')?.addEventListener('click', (e) => {
-        e.preventDefault();
-        activarModoSMC();
-    });
-
-    fetchMarketData();
-    setInterval(fetchMarketData, CONFIG.update_ms);
-
+    // Listeners de UI
+    setupEventListeners();
+    
+    // Carga inicial
+    cargarActivo();
+    
+    // Auto-ajuste de tamaño
     window.addEventListener('resize', () => {
         chart.applyOptions({ width: chartElement.offsetWidth, height: chartElement.offsetHeight });
     });
 }
 
-// --- GESTIÓN DE TIEMPO Y MODO ---
-function cambiarTF(tf) {
-    currentTimeframe = tf;
-    document.querySelectorAll('.tf-btn').forEach(btn => {
-        btn.classList.remove('active');
-        if(btn.innerText.toLowerCase() === tf) btn.classList.add('active');
-    });
-    fetchMarketData();
+// --- 2. GESTOR DE CONEXIONES (EL CEREBRO) ---
+async function cargarActivo() {
+    // Definimos el activo actual
+    const selector = document.getElementById('asset-selector');
+    const selectedOption = selector.options[selector.selectedIndex];
+    
+    GLOBAL.asset = selector.value;
+    GLOBAL.type = selectedOption.parentElement.label === 'Criptomonedas' ? 'crypto' : 'forex';
+    
+    document.getElementById('asset-name').innerText = selectedOption.text;
+    document.getElementById('signal-text').innerText = "CONECTANDO DATOS...";
+
+    // 1. Limpiamos conexiones viejas
+    if (GLOBAL.socket) { GLOBAL.socket.close(); GLOBAL.socket = null; }
+    if (GLOBAL.interval) { clearInterval(GLOBAL.interval); GLOBAL.interval = null; }
+
+    // 2. Cargamos historial (Velas pasadas)
+    await fetchHistoricalData();
+
+    // 3. Iniciamos el Stream en Vivo
+    if (GLOBAL.type === 'crypto') {
+        iniciarBinanceSocket(); // WebSocket Real
+    } else {
+        iniciarForexPolling();  // Polling Rápido
+    }
 }
 
-function activarModoSMC() {
-    terminalMode = 'smc';
-    document.getElementById('smc-info-card').style.display = 'block';
-    emaFastSeries.applyOptions({ visible: false });
-    emaSlowSeries.applyOptions({ visible: false });
-    fetchMarketData();
-}
-
-// --- OBTENCIÓN DE DATOS ---
-async function fetchMarketData() {
-    const ASSETS = {
-        'BTC': { type: 'crypto', id: 'bitcoin', symbol: 'BTC-USD', name: 'Bitcoin' },
-        'ETH': { type: 'crypto', id: 'ethereum', symbol: 'ETH-USD', name: 'Ethereum' },
-        'GOLD': { type: 'yahoo', symbol: 'GC=F', name: 'Oro' },
-        'US30': { type: 'yahoo', symbol: '^DJI', name: 'US30' },
-        'EURUSD': { type: 'yahoo', symbol: 'EURUSD=X', name: 'EUR/USD' },
-        'GBPUSD': { type: 'yahoo', symbol: 'GBPUSD=X', name: 'GBP/USD' },
-        'USDJPY': { type: 'yahoo', symbol: 'USDJPY=X', name: 'USD/JPY' }
-    };
-
-    const asset = ASSETS[currentAssetKey];
-    document.getElementById('asset-name').innerText = asset.name;
-
+// --- 3. DATOS HISTÓRICOS (API REST) ---
+async function fetchHistoricalData() {
+    let candles = [];
     try {
-        let candles = [];
-        if (asset.type === 'crypto') {
-            const r = await fetch(`https://api.coingecko.com/api/v3/coins/${asset.id}/ohlc?vs_currency=usd&days=1`);
-            const d = await r.json();
-            candles = d.map(x => ({ time: x[0]/1000, open: x[1], high: x[2], low: x[3], close: x[4] }));
+        if (GLOBAL.type === 'crypto') {
+            // Historial de Binance API
+            const symbol = GLOBAL.symbol_map[GLOBAL.asset].toUpperCase();
+            const res = await fetch(`https://api.binance.com/api/v3/klines?symbol=${symbol}&interval=${GLOBAL.tf}&limit=500`);
+            const data = await res.json();
+            candles = data.map(d => ({
+                time: d[0] / 1000, open: parseFloat(d[1]), high: parseFloat(d[2]),
+                low: parseFloat(d[3]), close: parseFloat(d[4])
+            }));
         } else {
-            const u = `https://query1.finance.yahoo.com/v8/finance/chart/${asset.symbol}?interval=${currentTimeframe}&range=2d`;
-            const p = `https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`;
-            const r = await fetch(p);
-            const j = await r.json();
-            const res = j.chart.result[0];
-            candles = res.timestamp.map((t, i) => ({
-                time: t, open: res.indicators.quote[0].open[i], high: res.indicators.quote[0].high[i],
-                low: res.indicators.quote[0].low[i], close: res.indicators.quote[0].close[i]
-            })).filter(c => c.open != null);
+            // Historial de Yahoo Finance
+            const res = await getYahooData(GLOBAL.asset);
+            candles = res;
         }
 
         if (candles.length > 0) {
             candleSeries.setData(candles);
-            procesarIndicadores(candles);
+            // Calculamos indicadores iniciales
+            actualizarIndicadores(candles);
         }
-    } catch (e) { console.error("Error en plataforma:", e); }
-}
-
-// --- LÓGICA DE INDICADORES ---
-function procesarIndicadores(candles) {
-    const rsiV = calculateRSI(candles, CONFIG.rsi_period);
-    const lastRSI = rsiV.length > 0 ? rsiV[rsiV.length - 1].value : 50;
-    const lastPrice = candles[candles.length - 1].close;
-
-    document.getElementById('current-price').innerText = `$${lastPrice.toLocaleString()}`;
-    document.getElementById('rsi-value').innerText = lastRSI.toFixed(2);
-
-    if (terminalMode === 'normal') {
-        const emaF = calculateEMA(candles, CONFIG.ema_fast);
-        const emaS = calculateEMA(candles, CONFIG.ema_slow);
-        emaFastSeries.setData(emaF);
-        emaSlowSeries.setData(emaS);
-        actualizarBanner(emaF, emaS, lastRSI);
-    } else {
-        const estructura = detectarSMC(candles);
-        document.getElementById('smc-status').innerText = estructura;
-        document.getElementById('signal-text').innerText = `MODO SMC: ${estructura}`;
+    } catch (e) {
+        console.error("Error historial:", e);
     }
 }
 
-// --- MATEMÁTICAS ---
+// --- 4. WEBSOCKET REAL (CRIPTO) ---
+function iniciarBinanceSocket() {
+    const symbol = GLOBAL.symbol_map[GLOBAL.asset];
+    const wsUrl = `wss://stream.binance.com:9443/ws/${symbol}@kline_${GLOBAL.tf}`;
+    
+    console.log(`🔌 Conectando socket a: ${symbol} (${GLOBAL.tf})`);
+    
+    GLOBAL.socket = new WebSocket(wsUrl);
+
+    GLOBAL.socket.onmessage = (event) => {
+        const msg = JSON.parse(event.data);
+        const k = msg.k;
+
+        const candle = {
+            time: k.t / 1000,
+            open: parseFloat(k.o),
+            high: parseFloat(k.h),
+            low: parseFloat(k.l),
+            close: parseFloat(k.c)
+        };
+
+        // .update() crea la magia del movimiento fluido
+        candleSeries.update(candle);
+        
+        // Actualizamos UI
+        document.getElementById('current-price').innerText = `$${candle.close.toFixed(2)}`;
+        
+        // Si la vela cerró, recalculamos indicadores
+        if (k.x) { 
+            // Aquí podríamos llamar a actualizarIndicadores de nuevo
+        }
+    };
+}
+
+// --- 5. FOREX POLLING RÁPIDO (SIMULACIÓN STREAM) ---
+function iniciarForexPolling() {
+    console.log("📡 Iniciando conexión rápida Forex...");
+    
+    // Función de actualización rápida
+    const updateForex = async () => {
+        const candles = await getYahooData(GLOBAL.asset);
+        if (candles && candles.length > 0) {
+            const lastCandle = candles[candles.length - 1];
+            candleSeries.update(lastCandle); // Actualiza la última vela
+            document.getElementById('current-price').innerText = `$${lastCandle.close.toFixed(2)}`;
+            actualizarIndicadores(candles); // Recalcula indicadores
+        }
+    };
+
+    // Ejecutar cada 3 segundos (3000ms)
+    GLOBAL.interval = setInterval(updateForex, 3000);
+}
+
+// --- UTILIDADES Y CÁLCULOS ---
+async function getYahooData(assetKey) {
+    // Mapeo de símbolos Yahoo
+    const symbols = { 'GOLD': 'GC=F', 'US30': '^DJI', 'EURUSD': 'EURUSD=X', 'GBPUSD': 'GBPUSD=X', 'USDJPY': 'USDJPY=X' };
+    const sym = symbols[assetKey];
+    
+    const url = `https://query1.finance.yahoo.com/v8/finance/chart/${sym}?interval=${GLOBAL.tf}&range=5d`;
+    // Usamos un proxy más rápido si es posible, o el mismo
+    const proxy = `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
+    
+    try {
+        const res = await fetch(proxy);
+        const data = await res.json();
+        const result = data.chart.result[0];
+        return result.timestamp.map((t, i) => ({
+            time: t,
+            open: result.indicators.quote[0].open[i],
+            high: result.indicators.quote[0].high[i],
+            low: result.indicators.quote[0].low[i],
+            close: result.indicators.quote[0].close[i]
+        })).filter(c => c.open != null);
+    } catch (e) { return []; }
+}
+
+function actualizarIndicadores(candles) {
+    // EMA
+    const emaF = calculateEMA(candles, CONFIG.ema_fast);
+    const emaS = calculateEMA(candles, CONFIG.ema_slow);
+    emaFastSeries.setData(emaF);
+    emaSlowSeries.setData(emaS);
+
+    // RSI
+    const rsiArr = calculateRSI(candles, CONFIG.rsi_period);
+    const lastRSI = rsiArr.length > 0 ? rsiArr[rsiArr.length - 1].value : 50;
+    document.getElementById('rsi-value').innerText = lastRSI.toFixed(2);
+    
+    // Señales
+    const lastF = emaF[emaF.length-1]?.value;
+    const lastS = emaS[emaS.length-1]?.value;
+    const banner = document.getElementById('status-banner');
+    const txt = document.getElementById('signal-text');
+
+    if (lastF > lastS && lastRSI < 70) { 
+        banner.className = 'buy'; txt.innerText = `🟢 CALL (COMPRA) - TF: ${GLOBAL.tf}`; 
+    } else if (lastF < lastS && lastRSI > 30) { 
+        banner.className = 'sell'; txt.innerText = `🔴 PUT (VENTA) - TF: ${GLOBAL.tf}`; 
+    } else { 
+        banner.className = 'neutral'; txt.innerText = "⚪ ESPERANDO ZONA"; 
+    }
+}
+
+// --- FUNCIONES MATEMÁTICAS ESTÁNDAR ---
 function calculateEMA(data, p) {
     let k = 2/(p+1), emaArr = [], ema = data[0].close;
     data.forEach((d, i) => {
@@ -168,30 +252,37 @@ function calculateRSI(data, p) {
     return rsiArr;
 }
 
-function detectarSMC(candles) {
-    if (candles.length < 10) return "Analizando...";
-    const last = candles[candles.length - 1];
-    const prev = candles[candles.length - 5];
-    if (last.close > prev.high) return "BOS ALCISTA 🚀";
-    if (last.close < prev.low) return "BOS BAJISTA 📉";
-    return "CONSOLIDACIÓN";
-}
+// --- LISTENERS Y UTILIDADES DE UI ---
+function setupEventListeners() {
+    document.getElementById('asset-selector').addEventListener('change', cargarActivo);
+    
+    // Botones de temporalidad
+    window.cambiarTF = function(tf) {
+        GLOBAL.tf = tf;
+        // Actualizar botones visualmente
+        document.querySelectorAll('.tf-btn').forEach(btn => {
+            btn.classList.remove('active');
+            if(btn.innerText.toLowerCase() === tf) btn.classList.add('active');
+        });
+        console.log("⏱️ Cambiando a:", tf);
+        cargarActivo(); // Recarga todo con la nueva temporalidad
+    };
 
-function actualizarBanner(f, s, r) {
-    const banner = document.getElementById('status-banner');
-    const txt = document.getElementById('signal-text');
-    const lF = f[f.length-1].value, lS = s[s.length-1].value;
-    if (lF > lS && r < 70) { banner.className = 'buy'; txt.innerText = "🟢 COMPRA SUGERIDA"; }
-    else if (lF < lS && r > 30) { banner.className = 'sell'; txt.innerText = "🔴 VENTA SUGERIDA"; }
-    else { banner.className = 'neutral'; txt.innerText = "⚪ ESPERANDO SEÑAL"; }
-}
+    window.activarModoSMC = function() {
+        document.getElementById('smc-info-card').style.display = 'block';
+        alert("Modo SMC: Activando Order Blocks (Requiere actualización mañana)");
+    };
 
-function actualizarParametros() {
-    CONFIG.ema_fast = parseInt(document.getElementById('input-ema-fast').value);
-    CONFIG.ema_slow = parseInt(document.getElementById('input-ema-slow').value);
-    CONFIG.rsi_period = parseInt(document.getElementById('input-rsi').value);
-}
-
-function ejecutarDiagnostico() {
-    alert(`ALHADIQA OK\nActivo: ${currentAssetKey}\nTF: ${currentTimeframe}\nModo: ${terminalMode}`);
-}
+    window.ejecutarDiagnostico = function() {
+        let estado = GLOBAL.socket ? "🟢 WebSocket Binance Activo" : "🟠 Polling Yahoo Activo";
+        alert(`ESTADO DEL SISTEMA:\nActivo: ${GLOBAL.asset}\nTF: ${GLOBAL.tf}\nConexión: ${estado}`);
+    };
+    
+    // Botón de ajustes
+    window.actualizarParametros = function() {
+        CONFIG.ema_fast = parseInt(document.getElementById('input-ema-fast').value) || 9;
+        CONFIG.ema_slow = parseInt(document.getElementById('input-ema-slow').value) || 21;
+        CONFIG.rsi_period = parseInt(document.getElementById('input-rsi').value) || 14;
+        cargarActivo(); // Recarga para aplicar cambios
+    };
+        }
