@@ -1,4 +1,5 @@
-// --- SISTEMA DE AUTO-RECUPERACIÓN DE LIBRERÍA ---
+// --- AL-HADIQA TERMINAL CORE ENGINE v3.5 ---
+
 (function checkLibrary() {
     if (typeof LightweightCharts === 'undefined') {
         const backupScript = document.createElement('script');
@@ -11,21 +12,21 @@
     }
 })();
 
-// --- CONFIGURACIÓN GLOBAL KIRA 1.0 ---
+// --- CONFIGURACIÓN GLOBAL ---
 let CONFIG = { 
     ema_20: 20, ema_50: 50, ema_80: 80, sma_100: 100, rsi_period: 14,
     risk_percent: 0.01 
 };
 
 let GLOBAL = {
-    asset: 'BTC', type: 'crypto', tf: '15m',
+    asset: 'BTC', tf: '15m',
     socket: null, velas: [],
     symbol_map: { 'BTC': 'btcusdt', 'ETH': 'ethusdt', 'EURUSD': 'eurusdt', 'GBPUSD': 'gbpusdt' }
 };
 
 let chart, candleSeries, ema20Series, ema50Series, ema80Series, sma100Series;
 
-// --- 1. MOTOR GRÁFICO (KALI & INSTITUTIONAL STYLE) ---
+// --- 1. MOTOR GRÁFICO (REDISEÑO STEALTH) ---
 function initTerminal() {
     const chartElement = document.getElementById('main-chart');
     if (!chartElement) return;
@@ -40,19 +41,19 @@ function initTerminal() {
             fontFamily: 'JetBrains Mono, monospace'
         },
         grid: { 
-            vertLines: { color: '#0f111a' }, 
-            horzLines: { color: '#0f111a' } 
+            vertLines: { color: '#0a0c12' }, 
+            horzLines: { color: '#0a0c12' } 
         },
-        timeScale: { timeVisible: true, borderColor: '#1f2335' },
-        crosshair: { mode: 0, vertLine: { color: '#1fd1ed' }, horzLine: { color: '#1fd1ed' } }
+        timeScale: { timeVisible: true, borderColor: '#1f2335', barSpacing: 8 },
+        crosshair: { mode: 0, vertLine: { color: '#1fd1ed', labelBackgroundColor: '#1fd1ed' }, horzLine: { color: '#1fd1ed', labelBackgroundColor: '#1fd1ed' } },
+        handleScroll: true, handleScale: true
     });
 
-    // Series con colores Kali
+    // Series con estética Kali
     candleSeries = chart.addCandlestickSeries({ upColor: '#00ff9d', downColor: '#ff4a4a', borderVisible: false, wickUpColor: '#00ff9d', wickDownColor: '#ff4a4a' });
-    ema20Series = chart.addLineSeries({ color: '#1fd1ed', lineWidth: 1, title: 'EMA 20' });
-    ema50Series = chart.addLineSeries({ color: '#9c27b0', lineWidth: 1, title: 'EMA 50' });
-    ema80Series = chart.addLineSeries({ color: '#d29922', lineWidth: 1, title: 'EMA 80' });
-    sma100Series = chart.addLineSeries({ color: '#f44336', lineWidth: 2, title: 'SMA 100' });
+    ema20Series = chart.addLineSeries({ color: '#1fd1ed', lineWidth: 1, priceLineVisible: false });
+    ema50Series = chart.addLineSeries({ color: '#9c27b0', lineWidth: 1, priceLineVisible: false });
+    sma100Series = chart.addLineSeries({ color: '#f44336', lineWidth: 1.5, priceLineVisible: false });
 
     setupEventListeners();
     cargarActivo();
@@ -63,7 +64,7 @@ function initTerminal() {
     resizeObserver.observe(chartElement);
 }
 
-// --- 2. GESTIÓN DE DATOS ---
+// --- 2. GESTIÓN DE FLUJO DE DATOS ---
 async function cargarActivo() {
     const selector = document.getElementById('asset-selector');
     if(!selector) return;
@@ -71,17 +72,31 @@ async function cargarActivo() {
     GLOBAL.asset = selector.value;
     document.getElementById('asset-name').innerText = selector.options[selector.selectedIndex].text;
     
-    if (GLOBAL.socket) GLOBAL.socket.close();
+    // Limpieza de socket previo
+    if (GLOBAL.socket) {
+        GLOBAL.socket.onmessage = null;
+        GLOBAL.socket.close();
+    }
     
-    document.getElementById('kira-action').innerText = "> FETCHING_MARKET_DATA...";
+    document.getElementById('kira-action').innerText = "> UPDATING_STREAM...";
     await fetchHistoricalData();
     iniciarBinanceSocket();
+}
+
+// Función para cambiar Temporalidad
+window.cambiarTF = function(newTf) {
+    GLOBAL.tf = newTf;
+    // Actualizar UI de botones
+    document.querySelectorAll('.tf-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.innerText.toLowerCase() === newTf);
+    });
+    cargarActivo();
 }
 
 async function fetchHistoricalData() {
     try {
         const symbol = GLOBAL.symbol_map[GLOBAL.asset].toUpperCase();
-        const res = await fetch(`https://api.binance.com/api/v3/klines?symbol=${symbol}&interval=${GLOBAL.tf}&limit=300`);
+        const res = await fetch(`https://api.binance.com/api/v3/klines?symbol=${symbol}&interval=${GLOBAL.tf}&limit=500`);
         const data = await res.json();
         
         GLOBAL.velas = data.map(d => ({
@@ -92,7 +107,7 @@ async function fetchHistoricalData() {
 
         candleSeries.setData(GLOBAL.velas);
         actualizarIndicadores(GLOBAL.velas);
-    } catch (e) { console.error("Error historial:", e); }
+    } catch (e) { console.error("ERR_DATA_FETCH:", e); }
 }
 
 function iniciarBinanceSocket() {
@@ -108,57 +123,62 @@ function iniciarBinanceSocket() {
         };
 
         candleSeries.update(candle);
-        const priceStr = candle.close > 1 ? candle.close.toFixed(2) : candle.close.toFixed(5);
+        
+        // Formateo dinámico de precio
+        const priceStr = candle.close.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 5 });
         document.getElementById('current-price').innerText = `$${priceStr}`;
 
-        if (k.x) {
+        if (k.x) { // Cierre de vela
             GLOBAL.velas.push(candle);
-            if (GLOBAL.velas.length > 500) GLOBAL.velas.shift();
+            if (GLOBAL.velas.length > 1000) GLOBAL.velas.shift();
             actualizarIndicadores(GLOBAL.velas);
         }
     };
 }
 
-// --- 3. MOTOR ANALÍTICO KIRA ---
+// --- 3. ANALÍTICA Y SEÑALES ---
 function actualizarIndicadores(candles) {
     if (candles.length < 100) return;
 
-    const e20 = calculateEMA(candles, CONFIG.ema_20);
-    const e50 = calculateEMA(candles, CONFIG.ema_50);
-    const e80 = calculateEMA(candles, CONFIG.ema_80);
-    const s100 = calculateSMA(candles, CONFIG.sma_100);
+    ema20Series.setData(calculateEMA(candles, CONFIG.ema_20));
+    ema50Series.setData(calculateEMA(candles, CONFIG.ema_50));
+    sma100Series.setData(calculateSMA(candles, CONFIG.sma_100));
+    
     const rsi = calculateRSI(candles, CONFIG.rsi_period);
-
-    ema20Series.setData(e20);
-    ema50Series.setData(e50);
-    ema80Series.setData(e80);
-    sma100Series.setData(s100);
-
-    // Actualizar UI RSI
     const lastRSI = rsi[rsi.length - 1].value;
+    
     document.getElementById('rsi-value').innerText = lastRSI.toFixed(2);
     document.getElementById('rsi-fill').style.width = `${lastRSI}%`;
+    
+    // Feedback de color RSI
+    const rsiFill = document.getElementById('rsi-fill');
+    if(lastRSI > 70) rsiFill.style.background = 'var(--danger)';
+    else if(lastRSI < 30) rsiFill.style.background = 'var(--success)';
+    else rsiFill.style.background = 'var(--accent)';
 
-    ejecutarLogicaKira(candles[candles.length - 1].close, lastRSI);
+    ejecutarLogicaKira(lastRSI);
 }
 
-function ejecutarLogicaKira(precio, rsi) {
+function ejecutarLogicaKira(rsi) {
     const box = document.getElementById('kira-signal-box');
     const action = document.getElementById('kira-action');
 
     if (rsi > 70) {
-        box.className = "kira-sell";
-        action.innerText = "> OVERBOUGHT_DANGER / SELL";
+        box.style.borderLeft = "4px solid var(--danger)";
+        action.innerText = "> SELL_CONFIRMED";
+        action.style.color = "var(--danger)";
     } else if (rsi < 30) {
-        box.className = "kira-buy";
-        action.innerText = "> OVERSOLD_CONFIRMED / BUY";
+        box.style.borderLeft = "4px solid var(--success)";
+        action.innerText = "> BUY_CONFIRMED";
+        action.style.color = "var(--success)";
     } else {
-        box.className = "kira-wait";
-        action.innerText = "> SCANNING_LIQUIDITY...";
+        box.style.borderLeft = "4px solid var(--text-dim)";
+        action.innerText = "> NEUTRAL_ZONE";
+        action.style.color = "var(--text-dim)";
     }
 }
 
-// --- 4. CÁLCULOS TÉCNICOS ---
+// --- 4. MATH UTILS ---
 function calculateEMA(data, p) {
     let k = 2 / (p + 1), emaArr = [], ema = data[0].close;
     data.forEach((d, i) => {
@@ -178,8 +198,7 @@ function calculateSMA(data, p) {
 }
 
 function calculateRSI(data, p) {
-    let rsiArr = [];
-    let gains = 0, losses = 0;
+    let rsiArr = [], gains = 0, losses = 0;
     for (let i = 1; i <= p; i++) {
         let diff = data[i].close - data[i - 1].close;
         if (diff >= 0) gains += diff; else losses -= diff;
@@ -194,15 +213,15 @@ function calculateRSI(data, p) {
     return rsiArr;
 }
 
-// --- 5. UTILIDADES INSTITUCIONALES ---
+// --- 5. TOOLS & PAYMENTS ---
 function calcularLotaje() {
     const balance = document.getElementById('kira-balance').value;
-    const lotaje = (balance * 0.00001).toFixed(2); // Ejemplo de gestión de riesgo 1:100
+    const lotaje = (balance * 0.00001).toFixed(2);
     document.getElementById('suggested-lot').innerText = lotaje > 0.01 ? lotaje : "0.01";
 }
 
 const KIRA_PAY = {
-    wallet: "0x3D88C06C786a3449377708705F6fE6306c368686", // Wallet BEP20 AL-HADIQA
+    wallet: "0x3D88C06C786a3449377708705F6fE6306c368686",
     abrir() {
         document.getElementById('crypto-modal').style.display = 'flex';
         document.getElementById('qr-deposit').src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${this.wallet}`;
@@ -219,9 +238,7 @@ async function conectarMetaMask() {
     if (window.ethereum) {
         try {
             const accounts = await ethereum.request({ method: 'eth_requestAccounts' });
-            alert("VINCULACIÓN_EXITOSA: " + accounts[0].substring(0, 10) + "...");
-        } catch (e) { console.error("User rejected"); }
-    } else {
-        alert("METAMASK_NOT_FOUND");
+            alert("LINK_SUCCESS: " + accounts[0].substring(0, 10) + "...");
+        } catch (e) { alert("LINK_REJECTED"); }
+    } else { alert("METAMASK_NOT_FOUND"); }
     }
-                                 }
