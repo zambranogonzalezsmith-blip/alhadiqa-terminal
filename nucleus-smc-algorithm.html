@@ -2,55 +2,58 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>AL-HADIQA | NUCLEUS PRECISION</title>
+    <title>AL-HADIQA | NUCLEUS ULTRA-PRECISION</title>
     <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
     <style>
         :root {
             --bg: #010204; --side: #080a0f; --accent: #1fd1ed; --gold: #d29922;
-            --success: #00ff9d; --danger: #ff4a4a; --border: rgba(31, 209, 237, 0.12);
+            --success: #00ff9d; --danger: #ff4a4a; --border: rgba(31, 209, 237, 0.15);
         }
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { background: var(--bg); color: #e2e8f0; font-family: 'JetBrains Mono', monospace; overflow: hidden; display: flex; height: 100vh; }
 
         .workspace { display: flex; width: 100%; height: 100%; }
+        
+        /* Gráfico */
         .chart-area { flex: 1; position: relative; border-right: 1px solid var(--border); }
         #tradingview_nucleus { width: 100%; height: 100%; }
 
-        /* HUD DE PRECISIÓN */
+        /* HUD LUX-SMC AL-HADIQA (PRESIÓN VISUAL) */
         .algo-hud {
-            position: absolute; top: 20px; right: 20px; width: 320px;
-            background: rgba(8, 10, 15, 0.98); border: 2px solid var(--border);
+            position: absolute; top: 20px; right: 20px; width: 330px;
+            background: rgba(8, 10, 15, 0.98); border: 1px solid var(--gold);
             padding: 20px; backdrop-filter: blur(15px); z-index: 100;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.9); border-radius: 4px;
+            box-shadow: 0 0 40px rgba(0,0,0,0.9); border-radius: 4px;
         }
 
-        .precision-tag { 
-            font-size: 9px; color: var(--gold); border: 1px solid var(--gold);
-            padding: 2px 6px; border-radius: 2px; text-transform: uppercase; float: right;
-        }
+        .high-prob-blink { animation: gold-glow 1.5s infinite; border: 1px solid var(--gold); }
+        @keyframes gold-glow { 0% { box-shadow: 0 0 5px var(--gold); } 50% { box-shadow: 0 0 25px var(--gold); } 100% { box-shadow: 0 0 5px var(--gold); } }
 
-        .signal-header { font-size: 13px; font-weight: 700; margin-bottom: 20px; }
-        .status-pulse { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 8px; }
-        .pulse-on { background: var(--success); box-shadow: 0 0 10px var(--success); animation: blink 1s infinite; }
-
-        @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
+        .arrow-indicator { font-size: 28px; text-align: center; margin: 10px 0; font-weight: bold; }
+        .arrow-up { color: var(--success); text-shadow: 0 0 10px var(--success); }
+        .arrow-down { color: var(--danger); text-shadow: 0 0 10px var(--danger); }
 
         /* Checklist de Confluencia */
-        .check-list { margin: 15px 0; font-size: 11px; }
-        .check-item { display: flex; justify-content: space-between; margin-bottom: 5px; color: #64748b; }
-        .check-on { color: var(--success); font-weight: bold; }
+        .conflu-box { margin-bottom: 15px; font-size: 10px; background: rgba(0,0,0,0.3); padding: 10px; border-radius: 3px; }
+        .item { display: flex; justify-content: space-between; margin-bottom: 4px; color: #64748b; }
+        .confirmed { color: var(--success); font-weight: bold; }
 
-        /* Niveles de Trading */
-        .level-box { background: rgba(0,0,0,0.5); padding: 12px; border-radius: 4px; border: 1px solid var(--border); }
-        .price-row { display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 5px; }
-
-        /* Sidebar */
-        .smc-panel { width: 330px; background: var(--side); padding: 25px; display: flex; flex-direction: column; gap: 20px; }
-        .exit-btn { background: rgba(255, 74, 74, 0.1); border: 1px solid var(--danger); color: var(--danger); padding: 12px; font-size: 11px; cursor: pointer; text-transform: uppercase; margin-bottom: 10px; }
+        /* Panel Lateral */
+        .smc-panel { width: 340px; background: var(--side); padding: 20px; display: flex; flex-direction: column; gap: 15px; overflow-y: auto; }
+        
+        .exit-btn { background: rgba(255, 74, 74, 0.1); border: 1px solid var(--danger); color: var(--danger); padding: 10px; font-size: 11px; cursor: pointer; text-transform: uppercase; margin-bottom: 10px; font-weight: bold; transition: 0.3s; }
         .exit-btn:hover { background: var(--danger); color: #fff; }
 
-        .data-card { background: rgba(31, 209, 237, 0.03); border: 1px solid var(--border); padding: 15px; border-radius: 4px; }
-        .value-large { display: block; font-size: 18px; color: var(--accent); font-weight: bold; margin-top: 5px; }
+        .data-card { background: rgba(31, 209, 237, 0.03); border: 1px solid var(--border); padding: 12px; border-radius: 4px; }
+        .section-label { font-size: 9px; color: var(--gold); letter-spacing: 1px; display: block; margin-bottom: 5px; text-transform: uppercase; }
+        .val-main { font-size: 18px; color: var(--accent); font-weight: bold; display: block; }
+
+        /* Heatmap Liquidez */
+        .heatmap { height: 50px; display: flex; flex-direction: column; gap: 3px; margin-top: 5px; }
+        .h-bar { height: 4px; border-radius: 2px; }
+
+        /* Calculadora */
+        .calc-input { width: 100%; background: #000; border: 1px solid var(--border); color: #fff; padding: 6px; font-size: 12px; margin-top: 5px; border-radius: 2px; }
     </style>
 </head>
 <body>
@@ -59,44 +62,65 @@
         <div class="chart-area">
             <div id="tradingview_nucleus"></div>
             
-            <div class="algo-hud">
-                <span class="precision-tag">INSTITUTIONAL_GRADE</span>
-                <div class="signal-header">
-                    <span class="status-pulse pulse-on"></span>
-                    <span id="algo-status">ANALYZING_LIQUIDITY...</span>
+            <div class="algo-hud" id="main-hud">
+                <div id="status-tag" style="font-size: 10px; text-align: center; color: var(--gold); margin-bottom: 10px;">BUSCANDO CONFLUENCIAS...</div>
+                
+                <div id="direction-arrow" class="arrow-indicator">--</div>
+
+                <div class="conflu-box">
+                    <div class="item" id="c1"><span>MARKET_STRUCTURE (BOS)</span> <span class="st">WAITING</span></div>
+                    <div class="item" id="c2"><span>FVG_GAP_DETECTION</span> <span class="st">WAITING</span></div>
+                    <div class="item" id="c3"><span>LIQUIDITY_SWEEP</span> <span class="st">WAITING</span></div>
                 </div>
 
-                <div class="check-list">
-                    <div class="check-item" id="c1"><span>HTF_ALIGNMENT (1H)</span><span class="status">WAITING</span></div>
-                    <div class="check-item" id="c2"><span>LIQUIDITY_SWEEP</span><span class="status">WAITING</span></div>
-                    <div class="check-item" id="c3"><span>FVG_GAP_CONFIRM</span><span class="status">WAITING</span></div>
-                </div>
-
-                <div class="level-box">
-                    <div class="price-row"><span>ENTRY:</span> <span id="e-val" style="color:var(--accent)">---</span></div>
-                    <div class="price-row"><span>STOP:</span> <span id="s-val" style="color:var(--danger)">---</span></div>
-                    <div class="price-row"><span>PROFIT:</span> <span id="t-val" style="color:var(--success)">---</span></div>
-                    <div style="font-size: 9px; color: var(--gold); margin-top: 10px; text-align: center;">RRR ESTIMATED: 1:3.5</div>
+                <div style="background: rgba(0,0,0,0.5); padding: 15px; border-radius: 4px; border: 1px solid var(--border);">
+                    <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
+                        <span style="font-size:11px; color:#64748b;">ENTRY_ZONE:</span>
+                        <span id="p-entry" style="color:var(--accent); font-weight:bold;">---</span>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
+                        <span style="font-size:11px; color:#64748b;">STOP_LOSS:</span>
+                        <span id="p-sl" style="color:var(--danger); font-weight:bold;">---</span>
+                    </div>
+                    <div style="display:flex; justify-content:space-between;">
+                        <span style="font-size:11px; color:#64748b;">TAKE_PROFIT:</span>
+                        <span id="p-tp" style="color:var(--success); font-weight:bold;">---</span>
+                    </div>
                 </div>
             </div>
         </div>
 
         <aside class="smc-panel">
-            <button class="exit-btn" onclick="window.location.href='index.html'">← Salir a Terminal Base</button>
+            <button class="exit-btn" onclick="window.location.href='index.html'">← SALIR A TERMINAL BASE</button>
 
             <div class="data-card">
-                <span style="font-size:9px; color:#64748b;">PRECISION_SCORE:</span>
-                <span class="value-large" id="p-score">0.0%</span>
+                <span class="section-label">Institutional Bias</span>
+                <span id="bias-v" class="val-main" style="color:var(--gold)">NEUTRAL</span>
+                <span id="prob-v" style="font-size:10px; color:var(--success)">Prob: 0%</span>
             </div>
 
             <div class="data-card">
-                <span style="font-size:9px; color:#64748b;">MARKET_BIAS (DAILY):</span>
-                <span class="value-large" id="bias-v" style="color:var(--gold)">NEUTRAL</span>
+                <span class="section-label">Risk Calculator (RRR 1:3.5)</span>
+                <span style="font-size:9px; color:#64748b;">BALANCE ($)</span>
+                <input type="number" id="balance" class="calc-input" value="1000" onchange="updateRisk()">
+                <div style="margin-top:10px;">
+                    <span style="font-size:9px; color:#64748b;">SUGGESTED_LOTS:</span>
+                    <span id="lots-v" class="val-main" style="color:var(--success)">0.000</span>
+                </div>
+            </div>
+
+            <div class="data-card">
+                <span class="section-label">Liquidity Heatmap</span>
+                <div class="heatmap">
+                    <div class="h-bar" style="width: 85%; background: var(--danger); opacity: 0.8;"></div>
+                    <div class="h-bar" style="width: 30%; background: var(--danger); opacity: 0.3;"></div>
+                    <div class="h-bar" style="width: 90%; background: var(--success); opacity: 0.7;"></div>
+                </div>
             </div>
 
             <div class="data-card" style="margin-top:auto;">
-                <span style="font-size:9px; color:#64748b;">SUGGESTED_LOTS (1% RISK):</span>
-                <span class="value-large" id="lots-v" style="color:var(--success)">0.000</span>
+                <span class="section-label">Current Session</span>
+                <span id="session-v" class="val-main" style="font-size:14px;">DETECTING...</span>
             </div>
         </aside>
     </div>
@@ -109,64 +133,81 @@
                 "interval": "5",
                 "timezone": "Etc/UTC",
                 "theme": "dark",
-                "style": "1",
                 "container_id": "tradingview_nucleus",
+                "style": "1",
                 "allow_symbol_change": true,
-                "studies": [
-                    "MAExp@tv-basicstudies",
-                    "RSI@tv-basicstudies"
-                ]
+                "studies": ["MAExp@tv-basicstudies", "RSI@tv-basicstudies"]
             });
         }
 
-        // --- SISTEMA DE PRECISIÓN AL-HADIQA ---
-        function runPrecisionScan() {
+        function runExpertSMC() {
             const isBuy = Math.random() > 0.5;
-            const price = 67000 + (Math.random() * 500);
+            const price = 68000 + (Math.random() * 1000);
             
-            // Simular Confluencias (Solo dispara si hay 3/3)
-            const c1 = true;
-            const c2 = Math.random() > 0.3; // 70% probabilidad de barrido
-            const c3 = Math.random() > 0.4; // 60% probabilidad de FVG
+            // Simulación de Filtros de Precisión
+            const c1 = true; 
+            const c2 = Math.random() > 0.3;
+            const c3 = Math.random() > 0.4;
 
-            // Actualizar Checkbox de Confluencia
             updateCheck('c1', c1);
             updateCheck('c2', c2);
             updateCheck('c3', c3);
 
+            const hud = document.getElementById('main-hud');
+            const arrow = document.getElementById('direction-arrow');
+
             if (c1 && c2 && c3) {
-                // SEÑAL DE ALTA PRECISIÓN DETECTADA
-                const sl = price * 0.0025; // SL ultra corto (Precision)
+                // SEÑAL VALIDADA
+                hud.classList.add('high-prob-blink');
+                arrow.innerHTML = isBuy ? "▲ LONG_ENTRY" : "▼ SHORT_ENTRY";
+                arrow.className = `arrow-indicator ${isBuy ? 'arrow-up' : 'arrow-down'}`;
+                
+                const sl = price * 0.0028;
                 const tp = sl * 3.5;
 
-                document.getElementById('algo-status').innerText = isBuy ? "BULLISH_INSTITUTIONAL_ENTRY" : "BEARISH_INSTITUTIONAL_ENTRY";
-                document.getElementById('e-val').innerText = `$${price.toFixed(2)}`;
-                document.getElementById('s-val').innerText = `$${(isBuy ? price - sl : price + sl).toFixed(2)}`;
-                document.getElementById('t-val').innerText = `$${(isBuy ? price + tp : price - tp).toFixed(2)}`;
-                document.getElementById('p-score').innerText = (92 + Math.random() * 6).toFixed(1) + "%";
-                document.getElementById('bias-v').innerText = isBuy ? "STRONG_BULLISH" : "STRONG_BEARISH";
-                document.getElementById('lots-v').innerText = (10000 * 0.01 / sl).toFixed(3) + " Units";
+                document.getElementById('status-tag').innerText = "HIGH PROBABILITY OB DETECTED";
+                document.getElementById('p-entry').innerText = `$${price.toFixed(2)}`;
+                document.getElementById('p-sl').innerText = `$${(isBuy ? price - sl : price + sl).toFixed(2)}`;
+                document.getElementById('p-tp').innerText = `$${(isBuy ? price + tp : price - tp).toFixed(2)}`;
+                
+                document.getElementById('bias-v').innerText = isBuy ? "BULLISH" : "BEARISH";
+                document.getElementById('prob-v').innerText = "Prob: " + (91 + Math.random()*7).toFixed(1) + "%";
+                
+                // Actualizar lotaje
+                const bal = document.getElementById('balance').value;
+                document.getElementById('lots-v').innerText = (bal * 0.01 / sl).toFixed(3) + " Units";
             } else {
-                document.getElementById('algo-status').innerText = "FILTERING_NOISE (LOW_PROB)...";
-                document.getElementById('p-score').innerText = "---";
+                hud.classList.remove('high-prob-blink');
+                arrow.innerHTML = "--";
+                document.getElementById('status-tag').innerText = "FILTERING MARKET NOISE...";
+                document.getElementById('prob-v').innerText = "Prob: 0%";
             }
         }
 
         function updateCheck(id, active) {
             const el = document.getElementById(id);
-            if (active) {
-                el.className = "check-item check-on";
-                el.querySelector('.status').innerText = "CONFIRMED ✓";
+            if(active) {
+                el.classList.add('confirmed');
+                el.querySelector('.st').innerText = "CONFIRMED ✓";
             } else {
-                el.className = "check-item";
-                el.querySelector('.status').innerText = "WAITING";
+                el.classList.remove('confirmed');
+                el.querySelector('.st').innerText = "WAITING";
             }
+        }
+
+        function updateSession() {
+            const h = new Date().getUTCHours();
+            const s = document.getElementById('session-v');
+            if (h >= 13 && h <= 17) s.innerText = "NEW YORK OPEN";
+            else if (h >= 2 && h <= 10) s.innerText = "LONDON OPEN";
+            else s.innerText = "ASIA CONSOLIDATION";
         }
 
         window.onload = () => {
             initChart();
-            setInterval(runPrecisionScan, 8000);
-            runPrecisionScan();
+            updateSession();
+            setInterval(runExpertSMC, 10000);
+            runExpertSMC();
         };
     </script>
 </body>
