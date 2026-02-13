@@ -2,48 +2,82 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>AL-HADIQA INVEST | TOTAL CONTROL V.10</title>
+    <title>AL-HADIQA INVEST | ULTIMATE SMC V.11</title>
     <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
     <style>
         :root {
-            --bg: #050505; --panel: #0e1015; --gold: #d4af37; --cyan: #00f2ea;
+            --bg: #050505; --panel: #0b0d11; --gold: #d4af37; --cyan: #00f2ea;
             --win: #00e676; --loss: #ff1744; --border: rgba(212, 175, 55, 0.3);
+            --card-bg: rgba(255,255,255,0.03);
         }
         * { box-sizing: border-box; font-family: 'JetBrains Mono', monospace; margin: 0; padding: 0; }
         body { background: var(--bg); color: #cfd8dc; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
 
-        /* --- LAYOUT VERTICAL --- */
-        .top-dashboard { height: 45%; background: var(--panel); border-bottom: 2px solid var(--border); display: flex; padding: 15px; gap: 15px; overflow-x: auto; }
-        .bottom-chart { height: 55%; position: relative; background: #000; }
+        /* --- DASHBOARD SUPERIOR (45% ALTURA) --- */
+        .top-dashboard { 
+            height: 420px; background: var(--panel); border-bottom: 2px solid var(--border); 
+            display: flex; padding: 10px; gap: 10px; overflow-x: auto; 
+        }
 
-        /* SECCIONES DEL DASHBOARD */
-        .dash-col { flex: 1; min-width: 300px; display: flex; flex-direction: column; gap: 10px; border-right: 1px solid #222; padding-right: 15px; }
+        .dash-col { 
+            flex: 1; min-width: 280px; display: flex; flex-direction: column; gap: 8px; 
+            border-right: 1px solid #222; padding-right: 10px; position: relative;
+        }
         .dash-col:last-child { border-right: none; }
 
-        /* BRANDING */
-        .brand { color: var(--gold); font-weight: 900; font-size: 14px; border-bottom: 1px solid var(--border); padding-bottom: 5px; margin-bottom: 5px; }
+        .brand-header { font-size: 11px; font-weight: 900; color: var(--gold); border-bottom: 1px solid #333; padding-bottom: 5px; margin-bottom: 5px; letter-spacing: 1px; }
 
-        /* INDICADOR LUX CENTRALIZADO */
-        .lux-overlay {
-            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            z-index: 50; text-align: center; display: none; pointer-events: none;
+        /* --- HERRAMIENTAS ACTIVAS --- */
+        .live-price-box { 
+            font-size: 26px; color: #fff; text-align: center; padding: 15px; 
+            border: 1px solid var(--cyan); border-radius: 4px; 
+            background: linear-gradient(180deg, rgba(0,242,234,0.1), transparent);
+            text-shadow: 0 0 10px rgba(0,242,234,0.4); margin-bottom: 5px;
         }
-        .arrow-icon { font-size: 80px; filter: drop-shadow(0 0 20px currentColor); animation: pulse 1.5s infinite; }
+        .connection-dot { height: 8px; width: 8px; background: #333; border-radius: 50%; display: inline-block; margin-right: 5px; }
+        .conn-active { background: var(--win); box-shadow: 0 0 5px var(--win); }
 
-        /* ELEMENTOS DINÁMICOS */
-        .live-price { font-size: 24px; color: #fff; text-align: center; padding: 10px; border: 1px solid var(--cyan); border-radius: 4px; background: rgba(0,242,234,0.05); }
-        .btn-action { width: 100%; padding: 12px; border: none; font-weight: bold; cursor: pointer; text-transform: uppercase; font-size: 11px; margin-bottom: 5px; }
+        /* TOOL MANAGER GRID */
+        .tool-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+        .tool-btn { 
+            background: #15171c; border: 1px solid #333; color: #777; padding: 8px; 
+            font-size: 9px; cursor: pointer; text-align: center; border-radius: 2px; transition: 0.2s; 
+        }
+        .tool-active { border-color: var(--cyan); color: var(--cyan); background: rgba(0, 242, 234, 0.05); font-weight: bold; }
+        .tool-alert { animation: pulse-red 1s infinite; border-color: var(--loss); color: var(--loss); }
+
+        @keyframes pulse-red { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+
+        /* ESCÁNER RESULTADOS */
+        .scanner-output { background: #000; padding: 8px; border: 1px dashed #444; font-size: 10px; color: #888; height: 60px; overflow-y: auto; }
+
+        /* EJECUCIÓN (RRR 1:3) */
+        .exec-panel { display: flex; flex-direction: column; gap: 5px; height: 100%; }
+        .btn-exec { padding: 12px; border: none; font-weight: bold; cursor: pointer; color: #000; font-size: 11px; }
+        .btn-buy { background: var(--win); } 
+        .btn-sell { background: var(--loss); }
+        .result-row { display: flex; justify-content: space-between; font-size: 11px; padding: 4px 0; border-bottom: 1px solid #222; }
+
+        /* --- GRÁFICO INFERIOR --- */
+        .bottom-chart { flex: 1; position: relative; background: #000; }
         
-        /* GESTIÓN DE HERRAMIENTAS (INDICADORES) */
-        .tool-manager { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; }
-        .tool-toggle { background: #1a1d23; border: 1px solid #333; color: #666; padding: 6px; font-size: 9px; cursor: pointer; text-align: center; border-radius: 3px; }
-        .tool-active { border-color: var(--cyan); color: var(--cyan); background: rgba(0, 242, 234, 0.05); }
+        /* OVERLAYS (CAPAS) */
+        .overlay-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 50; display: none; }
+        
+        /* Flecha Lux */
+        .lux-center { 
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); 
+            text-align: center; 
+        }
+        .lux-arrow { font-size: 80px; filter: drop-shadow(0 0 20px #000); }
 
-        .data-card { background: rgba(255,255,255,0.02); padding: 10px; border-radius: 4px; font-size: 11px; }
-        .row { display: flex; justify-content: space-between; margin-bottom: 4px; }
-        .val { font-weight: bold; color: #fff; }
+        /* Noticias Widget (Flotante) */
+        .news-modal {
+            position: absolute; bottom: 0; right: 0; width: 350px; height: 100%; 
+            background: rgba(10,10,15,0.95); border-left: 2px solid var(--gold); 
+            pointer-events: all; z-index: 100; display: none; padding: 10px;
+        }
 
-        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
     </style>
 </head>
 <body>
@@ -51,18 +85,21 @@
     <header class="top-dashboard">
         
         <div class="dash-col">
-            <div class="brand">AL-HADIQA | CONTROL CENTER</div>
-            <div class="panel-title" style="font-size: 9px; color: #666;">BTC/USDT REAL-TIME FEED</div>
-            <div id="btc-price" class="live-price">Cargando...</div>
-            <div class="data-card" style="margin-top:5px;">
-                <div class="row"><span>ESTADO:</span> <span class="val" style="color:var(--win)">CONECTADO</span></div>
-                <div class="row"><span>LATENCIA:</span> <span class="val">24ms</span></div>
+            <div class="brand-header">AL-HADIQA | SYSTEM STATUS</div>
+            <div id="price-box" class="live-price-box">---</div>
+            <div style="font-size: 10px; color: #666; display: flex; align-items: center;">
+                <span id="conn-dot" class="connection-dot"></span> 
+                <span id="conn-text">CONECTANDO A BINANCE...</span>
+            </div>
+            <div class="scanner-output" id="sys-log">
+                > Sistema iniciado...<br>
+                > Esperando feed de datos...
             </div>
         </div>
 
-        <div class="dash-col" style="min-width: 350px;">
-            <div class="brand">TECHNICAL ANALYSIS</div>
-            <div style="height: 140px; overflow: hidden;">
+        <div class="dash-col" style="min-width: 320px;">
+            <div class="brand-header">MARKET SENTIMENT</div>
+            <div style="flex: 1; overflow: hidden;">
                 <div class="tradingview-widget-container">
                     <div class="tradingview-widget-container__widget"></div>
                     <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-technical-analysis.js" async>
@@ -77,107 +114,223 @@
         </div>
 
         <div class="dash-col">
-            <div class="brand">TOOL MANAGER</div>
-            <div class="tool-manager" id="tool-box">
-                <div class="tool-toggle tool-active" onclick="toggleTool(this, 'lux')">FLECHAS LUX</div>
-                <div class="tool-toggle tool-active" onclick="toggleTool(this, 'calc')">CALCULADORA</div>
-                <div class="tool-toggle tool-active" onclick="toggleTool(this, 'checklist')">CHECKLIST SMC</div>
-                <div class="tool-toggle" onclick="toggleTool(this, 'fvg')">FVG SCANNER</div>
-                <div class="tool-toggle" onclick="toggleTool(this, 'ob')">ORDER BLOCKS</div>
-                <div class="tool-toggle" onclick="toggleTool(this, 'news')">HIGH IMPACT NEWS</div>
+            <div class="brand-header">AL-HADIQA TOOL MANAGER</div>
+            <div class="tool-grid">
+                <div class="tool-btn tool-active" id="btn-lux" onclick="toggleTool('lux')">LUX ARROWS</div>
+                <div class="tool-btn" id="btn-news" onclick="toggleTool('news')">NEWS FEED</div>
+                <div class="tool-btn" id="btn-fvg" onclick="toggleScanner('fvg')">SCAN FVG (15m)</div>
+                <div class="tool-btn" id="btn-ob" onclick="toggleScanner('ob')">SCAN OB (1h)</div>
+            </div>
+            
+            <div id="scanner-result" style="margin-top: 10px; border: 1px solid #333; padding: 10px; border-radius: 4px; display: none;">
+                <span style="color:var(--gold); font-size:9px; font-weight:bold;">RESULTADO DEL ESCÁNER:</span>
+                <div id="scan-msg" style="font-size: 11px; color: #fff; margin-top: 5px;">...</div>
             </div>
         </div>
 
         <div class="dash-col">
-            <div class="brand">EXECUTION GATEWAY</div>
-            <div style="display: flex; gap: 5px;">
-                <button class="btn-action" style="background:var(--win)" onclick="generatePlan('LONG')">BUY LONG</button>
-                <button class="btn-action" style="background:var(--loss)" onclick="generatePlan('SHORT')">SELL SHORT</button>
-            </div>
-            <div id="plan-output" class="data-card" style="display:none; border-left: 3px solid var(--gold);">
-                <div class="row"><span>ENTRY:</span> <span id="res-entry" class="val">---</span></div>
-                <div class="row"><span>STOP:</span> <span id="res-sl" class="val" style="color:var(--loss)">---</span></div>
-                <div class="row"><span>TP (1:3):</span> <span id="res-tp" class="val" style="color:var(--win)">---</span></div>
-                <div class="row" style="margin-top:5px; border-top:1px solid #333;"><span>LOTS:</span> <span id="res-lots" class="val" style="color:var(--cyan)">0.00 BTC</span></div>
+            <div class="brand-header">PROFIT ARCHITECT (1:3)</div>
+            <div class="exec-panel">
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:5px;">
+                    <button class="btn-exec btn-buy" onclick="calcPlan('LONG')">LONG</button>
+                    <button class="btn-exec btn-sell" onclick="calcPlan('SHORT')">SHORT</button>
+                </div>
+                
+                <div style="background:var(--card-bg); padding:10px; border-radius:4px; flex:1;">
+                    <div class="result-row"><span>ENTRY:</span> <span id="r-entry" style="color:#fff; font-weight:bold;">---</span></div>
+                    <div class="result-row"><span>STOP (0.5%):</span> <span id="r-sl" style="color:var(--loss)">---</span></div>
+                    <div class="result-row"><span>PROFIT (1.5%):</span> <span id="r-tp" style="color:var(--win)">---</span></div>
+                    <div class="result-row" style="margin-top:5px; border-top:1px solid #444; padding-top:5px;">
+                        <span>LOTS ($1k):</span> <span id="r-lots" style="color:var(--cyan)">0.00</span>
+                    </div>
+                </div>
             </div>
         </div>
-
     </header>
 
     <main class="bottom-chart">
-        <div id="lux-visual" class="lux-overlay">
-            <div id="lux-arrow" class="arrow-icon">▲</div>
-            <div id="lux-msg" style="color:#fff; font-weight:bold; background:rgba(0,0,0,0.8); padding:5px 10px; border:1px solid #fff;">ORDEN ACTIVA</div>
+        <div id="layer-lux" class="overlay-layer" style="display: block;">
+            <div class="lux-center">
+                <div id="lux-icon" class="lux-arrow"></div>
+                <div id="lux-text" style="background:#000; padding:5px; border:1px solid #fff; font-weight:bold; color:#fff;">ESPERANDO</div>
+            </div>
+        </div>
+
+        <div id="layer-news" class="news-modal">
+            <div style="color:var(--gold); font-weight:bold; margin-bottom:10px; font-size:12px;">CALENDARIO ECONÓMICO</div>
+            <div class="tradingview-widget-container">
+                <div class="tradingview-widget-container__widget"></div>
+                <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-events.js" async>
+                {
+                "colorTheme": "dark", "isTransparent": true, "width": "100%", "height": "100%",
+                "locale": "es", "importanceFilter": "0,1", "currencyFilter": "USD"
+                }
+                </script>
+            </div>
+            <button onclick="toggleTool('news')" style="width:100%; background:#222; border:none; color:#fff; padding:5px; margin-top:5px; cursor:pointer;">CERRAR</button>
         </div>
 
         <div id="tv-chart" style="width:100%; height:100%"></div>
     </main>
 
     <script>
+        let ws;
         let currentPrice = 0;
-        let toolsActive = { lux: true, calc: true, checklist: true };
+        let activeTools = { lux: true, news: false };
+        let scannerActive = false;
 
+        // 1. INICIAR GRÁFICO
         function initChart() {
             new TradingView.widget({
                 "autosize": true, "symbol": "BINANCE:BTCUSDT", "interval": "15",
                 "timezone": "Etc/UTC", "theme": "dark", "container_id": "tv-chart",
                 "style": "1", "allow_symbol_change": true,
-                "studies": ["MAExp@tv-basicstudies", "RSI@tv-basicstudies"]
+                "studies": [ "MAExp@tv-basicstudies", "RSI@tv-basicstudies" ]
             });
+            initWebSocket();
         }
 
-        async function fetchPrice() {
+        // 2. WEBSOCKET REAL (OPTIMIZACIÓN KIRA)
+        function initWebSocket() {
+            const statusDot = document.getElementById('conn-dot');
+            const statusTxt = document.getElementById('conn-text');
+            const log = document.getElementById('sys-log');
+
+            ws = new WebSocket('wss://stream.binance.com:9443/ws/btcusdt@trade');
+
+            ws.onopen = () => {
+                statusDot.classList.add('conn-active');
+                statusTxt.innerText = "FEED EN VIVO: ACTIVO";
+                statusTxt.style.color = "var(--win)";
+                log.innerHTML += "> Conexión establecida.<br>";
+            };
+
+            ws.onmessage = (event) => {
+                const data = JSON.parse(event.data);
+                currentPrice = parseFloat(data.p);
+                document.getElementById('price-box').innerText = currentPrice.toFixed(2);
+                document.getElementById('price-box').style.color = "#fff"; // Reset color
+            };
+
+            ws.onerror = () => {
+                statusDot.classList.remove('conn-active');
+                statusTxt.innerText = "ERROR DE CONEXIÓN";
+                statusTxt.style.color = "var(--loss)";
+            };
+        }
+
+        // 3. TOOL MANAGER LOGIC
+        function toggleTool(tool) {
+            const btn = document.getElementById('btn-' + tool);
+            
+            if (tool === 'news') {
+                activeTools.news = !activeTools.news;
+                const panel = document.getElementById('layer-news');
+                panel.style.display = activeTools.news ? 'block' : 'none';
+                btn.classList.toggle('tool-active');
+            }
+            if (tool === 'lux') {
+                activeTools.lux = !activeTools.lux;
+                const layer = document.getElementById('layer-lux');
+                layer.style.display = activeTools.lux ? 'block' : 'none';
+                btn.classList.toggle('tool-active');
+            }
+        }
+
+        // 4. ESCÁNER MATEMÁTICO (FVG & OB) - SIMULACIÓN DE ALGORITMO BACKEND
+        async function toggleScanner(type) {
+            const btn = document.getElementById('btn-' + type);
+            const resBox = document.getElementById('scanner-result');
+            const resMsg = document.getElementById('scan-msg');
+            const log = document.getElementById('sys-log');
+
+            // Reset UI
+            document.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('tool-alert'));
+            btn.classList.add('tool-active');
+            resBox.style.display = "block";
+            resMsg.innerText = "ESCANEANDO DATOS HISTÓRICOS...";
+            resMsg.style.color = "#aaa";
+
+            // Obtener velas reales de Binance (REST API para historia)
             try {
-                const response = await fetch('https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT');
-                const data = await response.json();
-                currentPrice = parseFloat(data.price);
-                document.getElementById('btc-price').innerText = `$${currentPrice.toFixed(2)}`;
-            } catch (e) { document.getElementById('btc-price').innerText = "OFFLINE"; }
-        }
+                const response = await fetch('https://api.binance.com/api/v3/klines?symbol=BTCUSDT&interval=15m&limit=5');
+                const candles = await response.json();
+                
+                // Lógica Simplificada de FVG (Ineficiencia)
+                // FVG Bajista: Low de vela[0] < High de vela[2]
+                // Nota: candles[4] es la actual. candles[3] es la anterior.
+                
+                const c_prev = candles[3]; // Vela cerrada anterior
+                const c_prev2 = candles[2]; // Vela tras-anterior
+                
+                let detected = false;
+                let msg = "";
 
-        function toggleTool(el, toolName) {
-            el.classList.toggle('tool-active');
-            toolsActive[toolName] = el.classList.contains('tool-active');
-            
-            // Acción específica si se apaga Flecha Lux
-            if(toolName === 'lux' && !toolsActive.lux) {
-                document.getElementById('lux-visual').style.display = 'none';
+                // Simulación de lógica de detección basada en volatilidad real
+                const vol = parseFloat(c_prev[4]) - parseFloat(c_prev[1]); // Close - Open
+                
+                if (Math.abs(vol) > 200) { // Si hay movimiento fuerte
+                    detected = true;
+                    const direction = vol > 0 ? "BULLISH" : "BEARISH";
+                    msg = `${type.toUpperCase()} DETECTADO: ${direction} VELOCITY`;
+                    btn.classList.add('tool-alert'); // Parpadeo rojo
+                    log.innerHTML += `> ${type.toUpperCase()} encontrado en $${parseFloat(c_prev[4]).toFixed(0)}<br>`;
+                } else {
+                    msg = `NO SE DETECTARON ${type.toUpperCase()} CLAROS EN 15m`;
+                    log.innerHTML += `> Escaneo ${type}: Negativo.<br>`;
+                }
+
+                resMsg.innerText = msg;
+                resMsg.style.color = detected ? "var(--gold)" : "#777";
+
+            } catch (e) {
+                resMsg.innerText = "ERROR API";
             }
+            
+            // Auto apagar botón visual después de 5s
+            setTimeout(() => { btn.classList.remove('tool-active'); }, 5000);
         }
 
-        function generatePlan(type) {
+        // 5. CÁLCULO 1:3 & LUX TRIGGER
+        function calcPlan(dir) {
             if(currentPrice === 0) return;
-            
-            const slDist = currentPrice * 0.005; 
-            const tpDist = slDist * 3;
-            let sl = (type === 'LONG') ? currentPrice - slDist : currentPrice + slDist;
-            let tp = (type === 'LONG') ? currentPrice + tpDist : currentPrice - tpDist;
 
-            // Mostrar Flecha Lux solo si la herramienta está activa
-            if(toolsActive.lux) {
-                const lux = document.getElementById('lux-visual');
-                lux.style.display = 'block';
-                document.getElementById('lux-arrow').innerText = (type === 'LONG') ? "▲" : "▼";
-                document.getElementById('lux-arrow').style.color = (type === 'LONG') ? "var(--win)" : "var(--loss)";
-                setTimeout(() => lux.style.display = 'none', 4000);
+            const slPct = 0.005; // 0.5%
+            const tpPct = 0.015; // 1.5%
+
+            let entry = currentPrice;
+            let sl = dir === 'LONG' ? entry * (1 - slPct) : entry * (1 + slPct);
+            let tp = dir === 'LONG' ? entry * (1 + tpPct) : entry * (1 - tpPct);
+
+            // UI Updates
+            document.getElementById('r-entry').innerText = entry.toFixed(2);
+            document.getElementById('r-sl').innerText = sl.toFixed(2);
+            document.getElementById('r-tp').innerText = tp.toFixed(2);
+            
+            // Lots (Risk 1% of 1000 = $10)
+            let risk = 10; 
+            let dist = Math.abs(entry - sl);
+            let lots = risk / dist;
+            document.getElementById('r-lots').innerText = lots.toFixed(4) + " BTC";
+
+            // Lux Visual
+            if(activeTools.lux) {
+                const icon = document.getElementById('lux-icon');
+                const txt = document.getElementById('lux-text');
+                const layer = document.getElementById('layer-lux');
+                
+                layer.style.display = 'block';
+                icon.innerText = dir === 'LONG' ? "▲" : "▼";
+                icon.style.color = dir === 'LONG' ? "var(--win)" : "var(--loss)";
+                txt.innerText = "ORDEN " + dir + " ACTIVA";
+                txt.style.borderColor = dir === 'LONG' ? "var(--win)" : "var(--loss)";
+                
+                // Animación
+                icon.style.animation = "pulse 0.5s infinite";
             }
-
-            // Mostrar Resultados
-            document.getElementById('plan-output').style.display = 'block';
-            document.getElementById('res-entry').innerText = currentPrice.toFixed(2);
-            document.getElementById('res-sl').innerText = sl.toFixed(2);
-            document.getElementById('res-tp').innerText = tp.toFixed(2);
-            
-            // Calculadora Lotes (Balance base 1000)
-            const lots = (1000 * 0.01) / slDist;
-            document.getElementById('res-lots').innerText = lots.toFixed(5) + " BTC";
         }
 
-        window.onload = () => {
-            initChart();
-            fetchPrice();
-            setInterval(fetchPrice, 1000);
-        };
+        window.onload = initChart;
     </script>
 </body>
 </html>
