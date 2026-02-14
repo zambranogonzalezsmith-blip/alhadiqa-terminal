@@ -9,42 +9,14 @@
             --bg: #050505; --panel: #0b0d11; --gold: #d4af37; --cyan: #00f2ea;
             --win: #00e676; --loss: #ff1744; --border: rgba(212, 175, 55, 0.3);
             --card-bg: rgba(255,255,255,0.03);
-            --nav-bg: #000000;
         }
         * { box-sizing: border-box; font-family: 'JetBrains Mono', monospace; margin: 0; padding: 0; }
-        
-        /* ESTRUCTURA PRINCIPAL */
-        body { 
-            background: var(--bg); color: #cfd8dc; height: 100vh; width: 100vw;
-            display: flex; flex-direction: column; overflow: hidden; 
-        }
+        body { background: var(--bg); color: #cfd8dc; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
 
-        /* --- MENÚ DE NAVEGACIÓN SUPERIOR (VISIBILIDAD FORZADA) --- */
-        .global-nav {
-            height: 40px; /* Altura fija */
-            width: 100%; 
-            background: var(--nav-bg); 
-            border-bottom: 1px solid var(--gold); /* Borde dorado visible */
-            display: flex; align-items: center; 
-            padding: 0 15px; gap: 20px; 
-            flex-shrink: 0; /* IMPIDE QUE DESAPAREZCA */
-            position: relative; z-index: 9999;
-        }
-        .nav-brand { color: var(--gold); font-weight: 900; font-size: 12px; margin-right: 15px; letter-spacing: 1px; }
-        .nav-link { 
-            text-decoration: none; color: #888; font-size: 11px; font-weight: bold; 
-            text-transform: uppercase; transition: 0.3s; padding: 5px 10px; border-radius: 2px; border: 1px solid transparent;
-        }
-        .nav-link:hover { color: #fff; background: rgba(255,255,255,0.1); border-color: #444; }
-        .nav-link.active { 
-            color: var(--cyan); background: rgba(0, 242, 234, 0.1); 
-            border: 1px solid var(--cyan); box-shadow: 0 0 10px rgba(0, 242, 234, 0.1);
-        }
-
-        /* --- DASHBOARD SUPERIOR (45% ALTURA) --- */
+        /* --- DASHBOARD SUPERIOR --- */
         .top-dashboard { 
             height: 420px; background: var(--panel); border-bottom: 2px solid var(--border); 
-            display: flex; padding: 10px; gap: 10px; overflow-x: auto; flex-shrink: 0;
+            display: flex; padding: 10px; gap: 10px; overflow-x: auto; 
         }
 
         .dash-col { 
@@ -55,7 +27,7 @@
 
         .brand-header { font-size: 11px; font-weight: 900; color: var(--gold); border-bottom: 1px solid #333; padding-bottom: 5px; margin-bottom: 5px; letter-spacing: 1px; }
 
-        /* --- HERRAMIENTAS ACTIVAS --- */
+        /* --- HERRAMIENTAS --- */
         .live-price-box { 
             font-size: 26px; color: #fff; text-align: center; padding: 15px; 
             border: 1px solid var(--cyan); border-radius: 4px; 
@@ -65,57 +37,40 @@
         .connection-dot { height: 8px; width: 8px; background: #333; border-radius: 50%; display: inline-block; margin-right: 5px; }
         .conn-active { background: var(--win); box-shadow: 0 0 5px var(--win); }
 
-        /* TOOL MANAGER GRID */
         .tool-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
         .tool-btn { 
             background: #15171c; border: 1px solid #333; color: #777; padding: 8px; 
             font-size: 9px; cursor: pointer; text-align: center; border-radius: 2px; transition: 0.2s; 
         }
         .tool-active { border-color: var(--cyan); color: var(--cyan); background: rgba(0, 242, 234, 0.05); font-weight: bold; }
-        .tool-alert { animation: pulse-red 1s infinite; border-color: var(--loss); color: var(--loss); }
+        
+        /* BOTÓN DE NAVEGACIÓN ESPECIAL */
+        .nav-special { border: 1px solid var(--gold) !important; color: var(--gold) !important; font-weight: bold; margin-top: 5px; }
+        .nav-special:hover { background: var(--gold); color: #000 !important; }
 
-        @keyframes pulse-red { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
-
-        /* ESCÁNER RESULTADOS */
         .scanner-output { background: #000; padding: 8px; border: 1px dashed #444; font-size: 10px; color: #888; height: 60px; overflow-y: auto; }
 
-        /* EJECUCIÓN (RRR 1:3) */
+        /* EJECUCIÓN */
         .exec-panel { display: flex; flex-direction: column; gap: 5px; height: 100%; }
         .btn-exec { padding: 12px; border: none; font-weight: bold; cursor: pointer; color: #000; font-size: 11px; }
         .btn-buy { background: var(--win); } 
         .btn-sell { background: var(--loss); }
         .result-row { display: flex; justify-content: space-between; font-size: 11px; padding: 4px 0; border-bottom: 1px solid #222; }
 
-        /* --- GRÁFICO INFERIOR --- */
-        .bottom-chart { flex: 1; position: relative; background: #000; overflow: hidden; }
-        
-        /* OVERLAYS (CAPAS) */
+        /* GRÁFICO */
+        .bottom-chart { flex: 1; position: relative; background: #000; }
         .overlay-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 50; display: none; }
-        
-        /* Flecha Lux */
-        .lux-center { 
-            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); 
-            text-align: center; 
-        }
+        .lux-center { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; }
         .lux-arrow { font-size: 80px; filter: drop-shadow(0 0 20px #000); }
 
-        /* Noticias Widget (Flotante) */
         .news-modal {
             position: absolute; bottom: 0; right: 0; width: 350px; height: 100%; 
             background: rgba(10,10,15,0.95); border-left: 2px solid var(--gold); 
             pointer-events: all; z-index: 100; display: none; padding: 10px;
         }
-
     </style>
 </head>
 <body>
-
-    <nav class="global-nav">
-        <span class="nav-brand">AL-HADIQA OS</span>
-        <a href="alhadiqa-terminal-main.html" class="nav-link">📁 MAIN TERMINAL</a>
-        <a href="nucleus-smc-v11-ultimate.html" class="nav-link active">📊 CRYPTO SMC V.11</a>
-        <a href="nucleus-fx-elite-v12.html" class="nav-link">🌐 FOREX ELITE V.12</a>
-    </nav>
 
     <header class="top-dashboard">
         
@@ -157,9 +112,14 @@
                 <div class="tool-btn" id="btn-ob" onclick="toggleScanner('ob')">SCAN OB (1h)</div>
             </div>
             
+            <div class="brand-header" style="margin-top:15px;">SYSTEM NAVIGATION</div>
+            <div class="tool-grid">
+                <button class="tool-btn nav-special" onclick="window.location.href='alhadiqa-terminal-main.html'">🏠 BACK TO MAIN</button>
+                <button class="tool-btn" onclick="window.location.href='nucleus-fx-elite-v12.html'">🌐 FOREX ELITE</button>
+            </div>
+
             <div id="scanner-result" style="margin-top: 10px; border: 1px solid #333; padding: 10px; border-radius: 4px; display: none;">
-                <span style="color:var(--gold); font-size:9px; font-weight:bold;">RESULTADO DEL ESCÁNER:</span>
-                <div id="scan-msg" style="font-size: 11px; color: #fff; margin-top: 5px;">...</div>
+                <div id="scan-msg" style="font-size: 11px; color: #fff;">...</div>
             </div>
         </div>
 
@@ -190,21 +150,10 @@
                 <div id="lux-text" style="background:#000; padding:5px; border:1px solid #fff; font-weight:bold; color:#fff;">ESPERANDO</div>
             </div>
         </div>
-
         <div id="layer-news" class="news-modal">
             <div style="color:var(--gold); font-weight:bold; margin-bottom:10px; font-size:12px;">CALENDARIO ECONÓMICO</div>
-            <div class="tradingview-widget-container">
-                <div class="tradingview-widget-container__widget"></div>
-                <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-events.js" async>
-                {
-                "colorTheme": "dark", "isTransparent": true, "width": "100%", "height": "100%",
-                "locale": "es", "importanceFilter": "0,1", "currencyFilter": "USD"
-                }
-                </script>
-            </div>
             <button onclick="toggleTool('news')" style="width:100%; background:#222; border:none; color:#fff; padding:5px; margin-top:5px; cursor:pointer;">CERRAR</button>
         </div>
-
         <div id="tv-chart" style="width:100%; height:100%"></div>
     </main>
 
@@ -212,9 +161,7 @@
         let ws;
         let currentPrice = 0;
         let activeTools = { lux: true, news: false };
-        let scannerActive = false;
 
-        // 1. INICIAR GRÁFICO
         function initChart() {
             new TradingView.widget({
                 "autosize": true, "symbol": "BINANCE:BTCUSDT", "interval": "15",
@@ -225,131 +172,57 @@
             initWebSocket();
         }
 
-        // 2. WEBSOCKET REAL
         function initWebSocket() {
             const statusDot = document.getElementById('conn-dot');
             const statusTxt = document.getElementById('conn-text');
-            const log = document.getElementById('sys-log');
-
             ws = new WebSocket('wss://stream.binance.com:9443/ws/btcusdt@trade');
-
             ws.onopen = () => {
                 statusDot.classList.add('conn-active');
                 statusTxt.innerText = "FEED EN VIVO: ACTIVO";
-                statusTxt.style.color = "var(--win)";
-                log.innerHTML += "> Conexión establecida.<br>";
             };
-
             ws.onmessage = (event) => {
                 const data = JSON.parse(event.data);
                 currentPrice = parseFloat(data.p);
                 document.getElementById('price-box').innerText = currentPrice.toFixed(2);
-                document.getElementById('price-box').style.color = "#fff"; 
-            };
-
-            ws.onerror = () => {
-                statusDot.classList.remove('conn-active');
-                statusTxt.innerText = "ERROR DE CONEXIÓN";
-                statusTxt.style.color = "var(--loss)";
             };
         }
 
-        // 3. TOOL MANAGER LOGIC
         function toggleTool(tool) {
             const btn = document.getElementById('btn-' + tool);
-            
             if (tool === 'news') {
                 activeTools.news = !activeTools.news;
-                const panel = document.getElementById('layer-news');
-                panel.style.display = activeTools.news ? 'block' : 'none';
+                document.getElementById('layer-news').style.display = activeTools.news ? 'block' : 'none';
                 btn.classList.toggle('tool-active');
             }
             if (tool === 'lux') {
                 activeTools.lux = !activeTools.lux;
-                const layer = document.getElementById('layer-lux');
-                layer.style.display = activeTools.lux ? 'block' : 'none';
+                document.getElementById('layer-lux').style.display = activeTools.lux ? 'block' : 'none';
                 btn.classList.toggle('tool-active');
             }
         }
 
-        // 4. ESCÁNER MATEMÁTICO (FVG & OB)
         async function toggleScanner(type) {
-            const btn = document.getElementById('btn-' + type);
             const resBox = document.getElementById('scanner-result');
             const resMsg = document.getElementById('scan-msg');
-            const log = document.getElementById('sys-log');
-
-            document.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('tool-alert'));
-            btn.classList.add('tool-active');
             resBox.style.display = "block";
-            resMsg.innerText = "ESCANEANDO DATOS HISTÓRICOS...";
-            resMsg.style.color = "#aaa";
-
-            try {
-                const response = await fetch('https://api.binance.com/api/v3/klines?symbol=BTCUSDT&interval=15m&limit=5');
-                const candles = await response.json();
-                
-                const c_prev = candles[3]; 
-                const c_prev2 = candles[2]; 
-                
-                let detected = false;
-                let msg = "";
-
-                const vol = parseFloat(c_prev[4]) - parseFloat(c_prev[1]); 
-                
-                if (Math.abs(vol) > 200) { 
-                    detected = true;
-                    const direction = vol > 0 ? "BULLISH" : "BEARISH";
-                    msg = `${type.toUpperCase()} DETECTADO: ${direction} VELOCITY`;
-                    btn.classList.add('tool-alert'); 
-                    log.innerHTML += `> ${type.toUpperCase()} encontrado en $${parseFloat(c_prev[4]).toFixed(0)}<br>`;
-                } else {
-                    msg = `NO SE DETECTARON ${type.toUpperCase()} CLAROS EN 15m`;
-                    log.innerHTML += `> Escaneo ${type}: Negativo.<br>`;
-                }
-
-                resMsg.innerText = msg;
-                resMsg.style.color = detected ? "var(--gold)" : "#777";
-
-            } catch (e) {
-                resMsg.innerText = "ERROR API";
-            }
-            
-            setTimeout(() => { btn.classList.remove('tool-active'); }, 5000);
+            resMsg.innerText = "ESCANEANDO " + type.toUpperCase() + "...";
+            setTimeout(() => { resMsg.innerText = "ESPERANDO CONFIRMACIÓN VOLUMEN"; }, 2000);
         }
 
-        // 5. CÁLCULO 1:3 & LUX TRIGGER
         function calcPlan(dir) {
             if(currentPrice === 0) return;
-
-            const slPct = 0.005; // 0.5%
-            const tpPct = 0.015; // 1.5%
-
             let entry = currentPrice;
-            let sl = dir === 'LONG' ? entry * (1 - slPct) : entry * (1 + slPct);
-            let tp = dir === 'LONG' ? entry * (1 + tpPct) : entry * (1 - tpPct);
-
+            let sl = dir === 'LONG' ? entry * 0.995 : entry * 1.005;
+            let tp = dir === 'LONG' ? entry * 1.015 : entry * 0.985;
             document.getElementById('r-entry').innerText = entry.toFixed(2);
             document.getElementById('r-sl').innerText = sl.toFixed(2);
             document.getElementById('r-tp').innerText = tp.toFixed(2);
             
-            let risk = 10; 
-            let dist = Math.abs(entry - sl);
-            let lots = risk / dist;
-            document.getElementById('r-lots').innerText = lots.toFixed(4) + " BTC";
-
             if(activeTools.lux) {
                 const icon = document.getElementById('lux-icon');
-                const txt = document.getElementById('lux-text');
-                const layer = document.getElementById('layer-lux');
-                
-                layer.style.display = 'block';
                 icon.innerText = dir === 'LONG' ? "▲" : "▼";
                 icon.style.color = dir === 'LONG' ? "var(--win)" : "var(--loss)";
-                txt.innerText = "ORDEN " + dir + " ACTIVA";
-                txt.style.borderColor = dir === 'LONG' ? "var(--win)" : "var(--loss)";
-                
-                icon.style.animation = "pulse 0.5s infinite";
+                document.getElementById('lux-text').innerText = "ORDEN " + dir + " ACTIVA";
             }
         }
 
