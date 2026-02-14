@@ -12,6 +12,7 @@
         :root {
             --bg: #020408; --side: #0a0c12; --accent: #1fd1ed; --gold: #d29922;
             --success: #00ff9d; --danger: #ff4a4a; --border: rgba(31, 209, 237, 0.15);
+            --fx-accent: #2962ff;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -37,6 +38,14 @@
         }
         .btn-nav:hover { border-color: var(--accent); background: rgba(31, 209, 237, 0.1); }
         .btn-nav.active { border-left: 3px solid var(--accent); background: rgba(31, 209, 237, 0.15); }
+
+        /* Estilo Especial para FX */
+        .btn-fx {
+            border: 1px solid var(--fx-accent);
+            background: rgba(41, 98, 255, 0.08);
+            color: #8fb1ff;
+        }
+        .btn-fx:hover { background: var(--fx-accent); color: #fff; }
 
         /* Estilo para el Nucleus Algo */
         .btn-nucleus {
@@ -84,14 +93,19 @@
     <aside class="sidebar">
         <div class="brand-zone">
             <h2 style="color:var(--accent); font-size: 18px;">ALHADIQA_OS</h2>
-            <small style="color:var(--gold)">KIRA_ENGINE_v6.0</small>
+            <small style="color:var(--gold)">KIRA_ENGINE_v7.0</small>
         </div>
 
         <div class="nav-group">
-            <span class="nav-label">SMC_ALGORITHMS</span>
+            <span class="nav-label">CRYPTO_SMC_ALGORITHMS</span>
             <button class="btn-nav active">📊 KIRA STANDARD</button>
             <button class="btn-nav btn-nucleus" onclick="window.location.href='nucleus-smc-algorithm.html'">🧠 NUCLEUS_SMC_ALGO</button>
-            <button class="btn-nav" onclick="alert('Cargando Filtro Bajo Capital...')">💎 KIRA LOW_CAPITAL</button>
+        </div>
+
+        <div class="nav-group">
+            <span class="nav-label">FOREX_STRATEGIES</span>
+            <button class="btn-nav btn-fx" onclick="window.location.href='nucleus-fx-elite-v12.html'">🌐 FX_ELITE_REVERSION</button>
+            <button class="btn-nav" onclick="alert('Cargando Scalper de Sesión...')">⏱️ SESSION_SCALPER</button>
         </div>
 
         <div class="nav-group">
@@ -101,7 +115,7 @@
         </div>
         
         <div style="margin-top: auto; padding: 10px; border-top: 1px solid var(--border);">
-            <small style="color: #64748b; font-size: 9px;">CONNECTED_TO: BINANCE_WSS</small>
+            <small style="color: #64748b; font-size: 9px;">CONNECTED_TO: MULTI_FEED_API</small>
         </div>
     </aside>
 
@@ -127,7 +141,6 @@
     </div>
 
     <script>
-        // --- INICIALIZACIÓN DE GRÁFICO PROFESIONAL ---
         let tvWidget;
 
         function initTradingView() {
@@ -145,26 +158,17 @@
                 "allow_symbol_change": true,
                 "container_id": "tv_chart_container",
                 "studies": [
-                    "MAExp@tv-basicstudies", // EMA 20
-                    "MAExp@tv-basicstudies", // EMA 50
-                    "MAExp@tv-basicstudies", // EMA 80
-                    "MASimple@tv-basicstudies", // SMA 100
+                    "MAExp@tv-basicstudies",
+                    "MAExp@tv-basicstudies",
+                    "MAExp@tv-basicstudies",
+                    "MASimple@tv-basicstudies",
                     "RSI@tv-basicstudies",
                     "MACD@tv-basicstudies"
-                ],
-                "studies_overrides": {
-                    "moving average exponential.length": 20,
-                    "moving average exponential.0.length": 20,
-                    "moving average exponential.1.length": 50,
-                    "moving average exponential.2.length": 80,
-                    "moving average.length": 100
-                }
+                ]
             });
         }
 
-        // --- CEREBRO DE SEÑALES KIRA ---
         function runKiraBrain() {
-            // Simulación de análisis institucional (RR 1:3)
             const basePrice = 64000 + (Math.random() * 2000);
             const isBuy = Math.random() > 0.5;
             
@@ -181,17 +185,15 @@
             document.getElementById('tp-p').innerText = `$${tp}`;
         }
 
-        // Reloj UTC
         setInterval(() => {
             document.getElementById('clock').innerText = new Date().toLocaleTimeString('en-GB', {timeZone:'UTC'}) + ' UTC';
         }, 1000);
 
-        // Actualizar señales cada 10 segundos
         setInterval(runKiraBrain, 10000);
 
         window.onload = () => {
             initTradingView();
-            setTimeout(runKiraBrain, 3000); // Primera señal tras carga
+            setTimeout(runKiraBrain, 3000);
         };
     </script>
 </body>
